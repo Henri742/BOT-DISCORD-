@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from discord import app_commands
-from google import genai
+import google.generativeai as genai
 import os
 import asyncio
 import time
@@ -17,7 +17,9 @@ load_dotenv()
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-client = genai.Client(api_key=GEMINI_API_KEY)
+genai.configure(api_key=GEMINI_API_KEY)
+
+model = genai.GenerativeModel("gemini-2.0-flash")
 
 # ========================
 # CONFIG BOT
@@ -31,7 +33,6 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 # ========================
 
 user_memory = defaultdict(list)
-
 MEMORY_LIMIT = 10
 
 # ========================
@@ -69,18 +70,23 @@ async def perguntar_gemini(user_id, pergunta):
 
     try:
 
-        response = client.models.generate_content(
-            model="gemini-1.5-flash",
-            contents=prompt
-        )
+        response = model.generate_content(prompt)
 
-        resposta = response.text
+        if response.text:
+            resposta = response.text
+        else:
+            resposta = "⚠️ A IA não retornou resposta."
 
     except Exception as e:
 
-        print(e)
+        print("ERRO GEMINI:", e)
 
-        resposta = "❌ Erro ao falar com a IA."
+        if "429" in str(e):
+            resposta = "⏳ Muitas requisições. Espere um momento."
+        elif "quota" in str(e).lower():
+            resposta = "⚠️ Limite da API atingido."
+        else:
+            resposta = "❌ Erro ao falar com a IA."
 
     history.append(f"Bot: {resposta}")
 
@@ -112,7 +118,6 @@ async def ai(interaction: discord.Interaction, pergunta: str):
             "⏳ Espere alguns segundos antes de usar novamente.",
             ephemeral=True
         )
-
         return
 
     await interaction.response.defer()
@@ -183,29 +188,10 @@ async def help(interaction: discord.Interaction):
         color=0x2ecc71
     )
 
-    embed.add_field(
-        name="/ai",
-        value="Pergunte qualquer coisa para a IA",
-        inline=False
-    )
-
-    embed.add_field(
-        name="/explicar",
-        value="Explica um tema",
-        inline=False
-    )
-
-    embed.add_field(
-        name="/resolver",
-        value="Resolve exercícios",
-        inline=False
-    )
-
-    embed.add_field(
-        name="/codigo",
-        value="Gerar código",
-        inline=False
-    )
+    embed.add_field(name="/ai", value="Pergunte qualquer coisa para a IA", inline=False)
+    embed.add_field(name="/explicar", value="Explica um tema", inline=False)
+    embed.add_field(name="/resolver", value="Resolve exercícios", inline=False)
+    embed.add_field(name="/codigo", value="Gerar código", inline=False)
 
     embed.set_footer(text="IA Gemini Flash")
 
@@ -226,7 +212,8 @@ async def start():
 
         except Exception as e:
 
-            print("⚠️ Bot caiu. Reiniciando em 10 segundos...")
+            print("⚠️ Bot caiu:", e)
+            print("Reiniciando em 10 segundos...")
 
             await asyncio.sleep(10)
 
