@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from discord import app_commands
-import google.generativeai as genai
+from google import genai
 import os
 import asyncio
 import time
@@ -17,9 +17,7 @@ load_dotenv()
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-genai.configure(api_key=GEMINI_API_KEY)
-
-model = genai.GenerativeModel("gemini-1.5-flash")
+client = genai.Client(api_key=GEMINI_API_KEY)
 
 # ========================
 # CONFIG BOT
@@ -71,11 +69,16 @@ async def perguntar_gemini(user_id, pergunta):
 
     try:
 
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=prompt
+        )
 
         resposta = response.text
 
     except Exception as e:
+
+        print(e)
 
         resposta = "❌ Erro ao falar com a IA."
 
