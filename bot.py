@@ -10,9 +10,8 @@ load_dotenv()
 
 # 2. Configurações da API
 GEMINI_KEY = os.getenv("GEMINI_API_KEY")
-# Testando o modelo PRO - O mais estável para chaves novas
-URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={GEMINI_KEY}"
-intents = discord.Intents.default()
+# Esta é a URL mais completa e oficial possível para o modelo Flash
+URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={GEMINI_KEY}"
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
