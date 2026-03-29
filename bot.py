@@ -47,6 +47,7 @@ def salvar_memoria():
 # CONFIG BOT DISCORD
 # ========================
 intents = discord.Intents.default()
+intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 cooldowns = defaultdict(float)
