@@ -20,12 +20,10 @@ load_dotenv()
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# Configuração do Cliente - Forçando Versão Estável v1 para evitar Erro 404
-client = genai.Client(
-    api_key=GEMINI_API_KEY,
-    http_options={'api_version': 'v1'}
-)
+# Cliente padrão (funciona melhor com chaves do AI Studio)
+client = genai.Client(api_key=GEMINI_API_KEY)
 
+# ID do modelo padrão estável
 MODEL_ID = "gemini-1.5-flash" 
 
 # ========================
@@ -34,16 +32,22 @@ MODEL_ID = "gemini-1.5-flash"
 MEMORY_FILE = "memory.json"
 
 try:
-    with open(MEMORY_FILE, "r") as f:
-        user_memory = json.load(f)
+    if os.path.exists(MEMORY_FILE):
+        with open(MEMORY_FILE, "r") as f:
+            user_memory = json.load(f)
+    else:
+        user_memory = {}
 except:
     user_memory = {}
 
 MEMORY_LIMIT = 10
 
 def salvar_memoria():
-    with open(MEMORY_FILE, "w") as f:
-        json.dump(user_memory, f)
+    try:
+        with open(MEMORY_FILE, "w") as f:
+            json.dump(user_memory, f)
+    except Exception as e:
+        print(f"Erro ao salvar memória: {e}")
 
 # ========================
 # CONFIG BOT DISCORD
@@ -69,8 +73,10 @@ async def perguntar_gemini(user_id, pergunta, multimidia=None):
     history = user_memory.get(str(user_id), [])
     
     if multimidia:
+        # Para imagens/arquivos, ignoramos o histórico para evitar erro de contexto
         contents = [pergunta, multimidia]
     else:
+        # Chat normal com memória
         history.append(f"Usuário: {pergunta}")
         if len(history) > MEMORY_LIMIT:
             history.pop(0)
@@ -84,7 +90,7 @@ async def perguntar_gemini(user_id, pergunta, multimidia=None):
         resposta = response.text
     except Exception as e:
         print(f"ERRO GEMINI ({user_id}): {e}")
-        resposta = "❌ Erro ao processar sua solicitação no servidor do Google."
+        resposta = "❌ Ocorreu um erro na comunicação com a IA. Verifique os logs."
 
     if not multimidia:
         history.append(f"Bot: {resposta}")
@@ -100,12 +106,12 @@ async def perguntar_gemini(user_id, pergunta, multimidia=None):
 @bot.event
 async def on_ready():
     await bot.tree.sync()
-    print(f"✅ {bot.user} online e corrigido!")
+    print(f"✅ {bot.user} ONLINE E PRONTO!")
 
 @bot.tree.command(name="ai", description="Chat livre com a IA")
 async def ai(interaction: discord.Interaction, pergunta: str):
     if not anti_spam(interaction.user.id):
-        return await interaction.response.send_message("⏳ Aguarde o cooldown.", ephemeral=True)
+        return await interaction.response.send_message("⏳ Aguarde 4 segundos.", ephemeral=True)
     await interaction.response.defer()
     await interaction.followup.send(await perguntar_gemini(interaction.user.id, pergunta))
 
@@ -117,17 +123,17 @@ async def explicar(interaction: discord.Interaction, tema: str):
 @bot.tree.command(name="resolver", description="Resolve exercícios")
 async def resolver(interaction: discord.Interaction, problema: str):
     await interaction.response.defer()
-    await interaction.followup.send(await perguntar_gemini(interaction.user.id, f"Resolva: {problema}"))
+    await interaction.followup.send(await perguntar_gemini(interaction.user.id, f"Resolva passo a passo: {problema}"))
 
 @bot.tree.command(name="codigo", description="Gera ou analisa códigos")
 async def codigo(interaction: discord.Interaction, pedido: str):
     await interaction.response.defer()
-    await interaction.followup.send(await perguntar_gemini(interaction.user.id, f"Programador: {pedido}"))
+    await interaction.followup.send(await perguntar_gemini(interaction.user.id, f"Aja como programador: {pedido}"))
 
 @bot.tree.command(name="prova", description="Gera mini prova")
 async def prova(interaction: discord.Interaction, tema: str):
     await interaction.response.defer()
-    await interaction.followup.send(await perguntar_gemini(interaction.user.id, f"Crie prova sobre {tema}"))
+    await interaction.followup.send(await perguntar_gemini(interaction.user.id, f"Crie prova de 5 questões sobre: {tema}"))
 
 @bot.tree.command(name="resolver_imagem", description="Resolve por foto")
 async def resolver_imagem(interaction: discord.Interaction, imagem: discord.Attachment):
@@ -146,8 +152,10 @@ async def resolver_pdf(interaction: discord.Interaction, pdf: discord.Attachment
 
 @bot.tree.command(name="helpgust", description="Guia de ajuda")
 async def helpgust(interaction: discord.Interaction):
-    embed = discord.Embed(title="🤖 GUSTAVO BOT", color=0x2ecc71)
-    embed.add_field(name="Comandos", value="`/ai`, `/explicar`, `/resolver`, `/codigo`, `/prova`, `/resolver_imagem`, `/resolver_pdf`")
+    embed = discord.Embed(title="🤖 GUSTAVO BOT", description="Aqui estão meus comandos:", color=0x2ecc71)
+    embed.add_field(name="Estudo", value="`/ai`, `/explicar`, `/resolver`, `/prova`", inline=False)
+    embed.add_field(name="Arquivos", value="`/resolver_imagem`, `/resolver_pdf`", inline=False)
+    embed.add_field(name="Outros", value="`/codigo`", inline=False)
     await interaction.response.send_message(embed=embed)
 
 # ========================
