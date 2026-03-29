@@ -36,7 +36,7 @@
       {"q": "Na divisão de frações, qual é o procedimento correto?", "opts": ["Divide-se os numeradores e os denominadores", "Mantém-se a primeira e multiplica-se pelo inverso da segunda", "Soma-se os numeradores", "Multiplica-se em linha reta diretamente"], "ans": 1},
       {"q": "Qual é o valor do módulo de |-7|?", "opts": ["-7", "0", "7", "1/7"], "ans": 2},
       {"q": "Em expressões algébricas, apenas podemos somar ou subtrair termos que sejam:", "opts": ["Positivos", "Semelhantes (mesma parte literal)", "Inteiros", "Diferentes"], "ans": 1},
-      {"q": "A propriedade comutativa da adição afirma que:", "opts": ["a + b = b + a", "a * b = b * a", "a + 0 = a", "a + (-a) = 0"], "ans": 0}
+      {"q": "A propriedade comutativa da adição afirma que:", "opts": ["a + b = b + a", "a * b = b * a", "a + 0 = a", "a + (-a) = 0"], "ans": 0},
       {"q": "Qual é a forma simplificada da expressão √50 + √18 - √8?", "opts": ["10√2", "6√2", "4√2", "√60"], "ans": 1},
       {"q": "Qual é o valor exato do módulo |5 - 12|?", "opts": ["-7", "7", "17", "0"], "ans": 1},
       {"q": "Quais são as raízes do polinómio B(x) = x² - 289?", "opts": ["17 e -17", "289 e 1", "13 e -13", "Apenas 17"], "ans": 0},
@@ -56,7 +56,7 @@
       {"q": "Qual é o principal problema de usar 'Muitas Ferramentas' sem regras definidas?", "opts": ["Comunicação confusa e informações dispersas", "Aumenta a velocidade da equipa", "Melhora a liderança", "Reduz o número de reuniões"], "ans": 0},
       {"q": "Segundo a Gestão Ágil, o desenvolvimento de software deve ser encarado como um trabalho:", "opts": ["Previsível e mecânico", "Linha de montagem", "Criativo e baseado em conhecimento", "Estático e inalterável"], "ans": 2},
       {"q": "Uma boa prática de comunicação numa equipa moderna é:", "opts": ["Marcar reuniões para qualquer assunto", "Usar o Slack de forma desorganizada", "Registar as decisões importantes de forma acessível", "Evitar o contacto entre os membros"], "ans": 2},
-      {"q": "No contexto ágil, o papel do gestor deve focar-se mais em:", "opts": ["Controlar os horários de entrada e saída", "Atuar como um líder facilitador que remove obstáculos", "Ditar cada linha de código", "Criar relatórios de desempenho diários"], "ans": 1}
+      {"q": "No contexto ágil, o papel do gestor deve focar-se mais em:", "opts": ["Controlar os horários de entrada e saída", "Atuar como um líder facilitador que remove obstáculos", "Ditar cada linha de código", "Criar relatórios de desempenho diários"], "ans": 1},
       {"q": "Qual é o foco principal da Gestão Ágil de Projetos?", "opts": ["Microgerenciamento e supervisão rigorosa.", "Foco em documentação pesada e detalhada.", "Adaptação rápida a mudanças e colaboração.", "Seguir o plano inicial cegamente, independentemente do cliente."], "ans": 2},
       {"q": "O que caracteriza uma Reunião Ruim no ambiente de TI?", "opts": ["Ter um objetivo claro e pauta enviada previamente.", "Começar e terminar pontualmente no horário.", "Não ter pauta definida, durar muito tempo e não gerar decisões.", "Envolver apenas as pessoas estritamente necessárias."], "ans": 2},
       {"q": "Por que motivo a 'Gerência Clássica' (modelo em Cascata) falha frequentemente em projetos de desenvolvimento de software?", "opts": ["Porque é uma metodologia muito rápida e desorganizada.", "Porque exige que o cliente saiba tudo no início, sendo que o software é mutável.", "Porque tem poucos documentos para guiar a equipa.", "Porque não exige a presença de um Gestor de Projeto."], "ans": 1},
@@ -73,12 +73,12 @@
       {"q": "A proposição 'Maceió é a capital de Alagoas' é classificada como:", "opts": ["Proposição Molecular", "Proposição Composta", "Proposição Atômica (Simples)", "Não é uma proposição"], "ans": 2},
       {"q": "Qual a regra principal da Conjunção (E / ^)?", "opts": ["Só é V se tudo for V.", "É V se pelo menos um for V.", "Só é F se for V -> F.", "Inverte o valor original."], "ans": 0},
       {"q": "Na Condicional (->), qual é o único caso em que o resultado é Falso?", "opts": ["F -> F", "V -> V", "F -> V", "V -> F (Regra Vera Fischer)"], "ans": 3},
-      {"q": "Quantas linhas tem a tabela-verdade da proposição composta: ~p v (q ^ r)?", "opts": ["4 linhas", "6 linhas", "8 linhas", "9 linhas"], "ans": 2},
+      {"q": "Quantas lines tem a tabela-verdade da proposição composta: ~p v (q ^ r)?", "opts": ["4 linhas", "6 linhas", "8 linhas", "9 linhas"], "ans": 2},
       {"q": "O conectivo '~' (til) tem qual função lógica?", "opts": ["Somar valores", "Multiplicar", "Negação (Inverter o valor lógico)", "Condicionar proposições"], "ans": 2},
       {"q": "No cálculo proposicional, a Bicondicional (<->) é verdadeira quando:", "opts": ["Os valores lógicos são diferentes.", "O primeiro é V e o segundo é F.", "Os valores lógicos de ambas são iguais.", "Tudo for falso."], "ans": 2},
       {"q": "Qual é a base fundamental para o projeto de circuitos digitais e computadores modernos?", "opts": ["Teoria dos Grafos", "Álgebra Booleana", "Cálculo Diferencial", "Geometria Analítica"], "ans": 1},
       {"q": "O Princípio da Não Contradição estabelece que:", "opts": ["Tudo é falso.", "Uma proposição não pode ser verdadeira e falsa ao mesmo tempo.", "Existem três valores lógicos.", "A negação de V é V."], "ans": 1},
-      {"q": "Como se traduz a expressão lógica ~p ^ ~q para a linguagem natural (p: 'está quente', q: 'está chovendo')?", "opts": ["Está quente e chovendo", "Não está quente ou não está chovendo", "Não está quente e não está chovendo", "Se não está quente, não está chovendo"], "ans": 2}
+      {"q": "Como se traduz a expressão lógica ~p ^ ~q para a linguagem natural (p: 'está quente', q: 'está chovendo')?", "opts": ["Está quente e chovendo", "Não está quente ou não está chovendo", "Não está quente e não está chovendo", "Se não está quente, não está chovendo"], "ans": 2},
       {"q": "Como se traduz a expressão p ↔ ~q para a linguagem natural (Sendo p: 'está quente', q: 'está chovendo')?", "opts": ["Está quente e não está chovendo", "Se está quente, não está chovendo", "Está quente se e somente se não está chovendo", "Não está quente ou chovendo"], "ans": 2},
       {"q": "Se tivermos uma Condicional (->) onde o antecedente é Falso e o consequente é Verdadeiro (F -> V), qual é o resultado?", "opts": ["Verdadeiro", "Falso", "Depende do valor de p", "Inconclusivo"], "ans": 0},
       {"q": "Numa tabela-verdade com três proposições (p, q, r), qual é o padrão de alternância da primeira coluna (p)?", "opts": ["Alterna V e F a cada linha", "Alterna de 2 em 2", "Alterna de 4 em 4 (4 Verdadeiros e 4 Falsos)", "São todas Verdadeiras"], "ans": 2},
@@ -100,7 +100,7 @@
       {"q": "Como descobrimos o tipo de uma variável em Python?", "opts": ["print()", "len()", "type()", "find()"], "ans": 2},
       {"q": "Qual é a estrutura condicional em Python executada caso todas as condições anteriores sejam falsas?", "opts": ["if", "elif", "else", "while"], "ans": 2},
       {"q": "Se x = '10' e y = '20', qual é o resultado de print(x + y) em Python?", "opts": ["30", "1020", "Erro de sintaxe", "0"], "ans": 1},
-      {"q": "Qual é a estrutura de repetição que testa a condição ANTES de executar o bloco de código?", "opts": ["Repita... até", "Enquanto (While)", "Para (For)", "Se (If)"], "ans": 1}
+      {"q": "Qual é a estrutura de repetição que testa a condição ANTES de executar o bloco de código?", "opts": ["Repita... até", "Enquanto (While)", "Para (For)", "Se (If)"], "ans": 1},
       {"q": "O que representa o símbolo do Losango num Fluxograma?", "opts": ["Início ou fim do programa", "Processamento de dados", "Tomada de Decisão (Condição)", "Entrada de dados pelo teclado"], "ans": 2},
       {"q": "Qual a estrutura de repetição que deve ser usada quando JÁ SABEMOS previamente o número exato de repetições?", "opts": ["Enquanto (While)", "Repita... Até", "Se... Então", "Para... Até (For)"], "ans": 3},
       {"q": "Qual é a definição correta de um Algoritmo?", "opts": ["Uma linguagem de programação moderna.", "Uma peça de hardware de processamento.", "Uma sequência de números aleatórios.", "Uma sequência finita de passos lógicos para resolver um problema."], "ans": 3},
