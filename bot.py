@@ -8,6 +8,7 @@ load_dotenv()
 
 GEMINI_KEY = os.getenv("GEMINI_API_KEY")
 # URL forçando a v1 estável. Se a JESUS estiver certa, aqui não tem erro!
+# Tente esta URL exata (algumas contas exigem o modelo sem o prefixo 'models/' na v1)
 URL = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={GEMINI_KEY}"
 
 intents = discord.Intents.default()
