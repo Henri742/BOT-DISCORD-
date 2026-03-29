@@ -37,6 +37,16 @@
       {"q": "Qual é o valor do módulo de |-7|?", "opts": ["-7", "0", "7", "1/7"], "ans": 2},
       {"q": "Em expressões algébricas, apenas podemos somar ou subtrair termos que sejam:", "opts": ["Positivos", "Semelhantes (mesma parte literal)", "Inteiros", "Diferentes"], "ans": 1},
       {"q": "A propriedade comutativa da adição afirma que:", "opts": ["a + b = b + a", "a * b = b * a", "a + 0 = a", "a + (-a) = 0"], "ans": 0}
+      {"q": "Qual é a forma simplificada da expressão √50 + √18 - √8?", "opts": ["10√2", "6√2", "4√2", "√60"], "ans": 1},
+      {"q": "Qual é o valor exato do módulo |5 - 12|?", "opts": ["-7", "7", "17", "0"], "ans": 1},
+      {"q": "Quais são as raízes do polinómio B(x) = x² - 289?", "opts": ["17 e -17", "289 e 1", "13 e -13", "Apenas 17"], "ans": 0},
+      {"q": "Aplicando as propriedades da radiciação, como simplificamos a raiz cúbica da raiz quadrada de 13?", "opts": ["√13 (Raiz 5ª)", "√13 (Raiz 1.5ª)", "√13 (Raiz 6ª)", "√13 (Raiz 9ª)"], "ans": 2},
+      {"q": "Qual é o resultado da expressão: [(4³ - 2⁴) / 2²] + (1/2)⁻² ?", "opts": ["8", "12", "16", "32"], "ans": 2},
+      {"q": "Sobre o número P = 91, é correto afirmar que:", "opts": ["É um número primo.", "Possui exatamente três divisores positivos.", "É divisível por dois números primos distintos (7 e 13).", "É divisível apenas por 3."], "ans": 2},
+      {"q": "Simplifique a expressão com radicais: raiz 5ª da raiz 3ª de (4¹⁵).", "opts": ["4", "16", "4¹⁰", "2"], "ans": 0},
+      {"q": "Realize a adição dos polinómios: (-4x² + 3x - 4) + (-3x² + 2x - 1).", "opts": ["-x² + x - 3", "-7x² + 5x - 5", "7x² - 5x + 5", "-12x² + 6x + 4"], "ans": 1},
+      {"q": "Qual é o resultado da multiplicação dos monómios (4x²y) e (3x³y²)?", "opts": ["7x⁵y³", "12x⁶y²", "12x⁵y³", "7x⁶y²"], "ans": 2},
+      {"q": "Na divisão de expressões algébricas, qual é o resultado de (4x³y²) / (5x²y)?", "opts": ["(4/5)x⁵y³", "(4/5)xy", "0.8x²y", "xy"], "ans": 1}
     ],
     "Gestao_Times": [
       {"q": "Qual o foco principal da Gestão Ágil?", "opts": ["Microgestão", "Foco em documentação pesada", "Adaptação e colaboração", "Seguir o plano inicial cegamente"], "ans": 2},
@@ -47,6 +57,16 @@
       {"q": "Segundo a Gestão Ágil, o desenvolvimento de software deve ser encarado como um trabalho:", "opts": ["Previsível e mecânico", "Linha de montagem", "Criativo e baseado em conhecimento", "Estático e inalterável"], "ans": 2},
       {"q": "Uma boa prática de comunicação numa equipa moderna é:", "opts": ["Marcar reuniões para qualquer assunto", "Usar o Slack de forma desorganizada", "Registar as decisões importantes de forma acessível", "Evitar o contacto entre os membros"], "ans": 2},
       {"q": "No contexto ágil, o papel do gestor deve focar-se mais em:", "opts": ["Controlar os horários de entrada e saída", "Atuar como um líder facilitador que remove obstáculos", "Ditar cada linha de código", "Criar relatórios de desempenho diários"], "ans": 1}
+      {"q": "Qual é o foco principal da Gestão Ágil de Projetos?", "opts": ["Microgerenciamento e supervisão rigorosa.", "Foco em documentação pesada e detalhada.", "Adaptação rápida a mudanças e colaboração.", "Seguir o plano inicial cegamente, independentemente do cliente."], "ans": 2},
+      {"q": "O que caracteriza uma Reunião Ruim no ambiente de TI?", "opts": ["Ter um objetivo claro e pauta enviada previamente.", "Começar e terminar pontualmente no horário.", "Não ter pauta definida, durar muito tempo e não gerar decisões.", "Envolver apenas as pessoas estritamente necessárias."], "ans": 2},
+      {"q": "Por que motivo a 'Gerência Clássica' (modelo em Cascata) falha frequentemente em projetos de desenvolvimento de software?", "opts": ["Porque é uma metodologia muito rápida e desorganizada.", "Porque exige que o cliente saiba tudo no início, sendo que o software é mutável.", "Porque tem poucos documentos para guiar a equipa.", "Porque não exige a presença de um Gestor de Projeto."], "ans": 1},
+      {"q": "No contexto ágil, o que significa 'Documentação Mínima Viável'?", "opts": ["Não ter nenhum tipo de documento escrito.", "Documentar absolutamente todos os requisitos em centenas de PDFs.", "Criar apenas o essencial para que a equipa entenda o contexto e use no dia a dia.", "Um documento criado exclusivamente pelo líder técnico e que nunca é alterado."], "ans": 2},
+      {"q": "Qual é a principal consequência negativa de usar 'Muitas Ferramentas' de comunicação (Slack, Jira, Teams, etc.) sem regras definidas?", "opts": ["Comunicação confusa, perda de foco e informações espalhadas/perdidas.", "Aumenta drasticamente a velocidade de entrega da equipa.", "Melhora as competências de liderança dos programadores.", "Reduz significativamente o número de reuniões necessárias."], "ans": 0},
+      {"q": "Segundo a filosofia da Gestão de Times modernos, o desenvolvimento de software deve ser tratado como um trabalho:", "opts": ["Previsível e mecânico, como apertar parafusos.", "Similar a uma linha de montagem de fábricas clássicas.", "Criativo, incerto e baseado em conhecimento.", "Estático, onde os requisitos nunca sofrem alterações."], "ans": 2},
+      {"q": "O que não pode faltar numa reunião considerada Produtiva?", "opts": ["Café e horas de conversa informal.", "Objetivo claro, pauta e registo das decisões finais.", "Presença de todos os funcionários da empresa, até dos que não estão no projeto.", "Discussão detalhada sobre ferramentas tecnológicas de infraestrutura."], "ans": 1},
+      {"q": "Na transição da Gestão Clássica para a Gestão Ágil, como as pessoas devem ser vistas pela liderança?", "opts": ["Como meros 'recursos' alocáveis e substituíveis.", "Como indivíduos criativos que precisam de ambiente colaborativo e de autonomia.", "Como robôs que apenas seguem o pseudocódigo.", "Como peças que devem ser microgeridas diariamente."], "ans": 1},
+      {"q": "Por que 'planejar tudo no início' é uma armadilha no desenvolvimento de software?", "opts": ["Porque os programadores são lentos.", "Porque o ambiente é de alta incerteza e os requisitos vão mudar ao longo do tempo.", "Porque o cliente nunca quer pagar o valor acordado.", "Porque a tecnologia impede o planeamento a longo prazo."], "ans": 1},
+      {"q": "As ferramentas não resolvem problemas sozinhas. Qual é a combinação correta para que o Jira ou o Slack tragam resultados reais?", "opts": ["Muitas ferramentas + Ausência de liderança", "Ferramentas caras + Documentação clássica pesada", "Poucas ferramentas + Processos e boas práticas bem definidas pela equipa", "Ferramentas gratuitas + Reuniões de 3 horas todos os dias"], "ans": 2}
     ],
     "Matematica_Logica": [
       {"q": "O que afirma o Princípio do Terceiro Excluído?", "opts": ["Uma proposição pode ser V e F.", "Ou é V ou é F, não existe uma terceira opção.", "Toda a proposição composta é V.", "Depende da tabela-verdade."], "ans": 1},
@@ -59,6 +79,16 @@
       {"q": "Qual é a base fundamental para o projeto de circuitos digitais e computadores modernos?", "opts": ["Teoria dos Grafos", "Álgebra Booleana", "Cálculo Diferencial", "Geometria Analítica"], "ans": 1},
       {"q": "O Princípio da Não Contradição estabelece que:", "opts": ["Tudo é falso.", "Uma proposição não pode ser verdadeira e falsa ao mesmo tempo.", "Existem três valores lógicos.", "A negação de V é V."], "ans": 1},
       {"q": "Como se traduz a expressão lógica ~p ^ ~q para a linguagem natural (p: 'está quente', q: 'está chovendo')?", "opts": ["Está quente e chovendo", "Não está quente ou não está chovendo", "Não está quente e não está chovendo", "Se não está quente, não está chovendo"], "ans": 2}
+      {"q": "Como se traduz a expressão p ↔ ~q para a linguagem natural (Sendo p: 'está quente', q: 'está chovendo')?", "opts": ["Está quente e não está chovendo", "Se está quente, não está chovendo", "Está quente se e somente se não está chovendo", "Não está quente ou chovendo"], "ans": 2},
+      {"q": "Se tivermos uma Condicional (->) onde o antecedente é Falso e o consequente é Verdadeiro (F -> V), qual é o resultado?", "opts": ["Verdadeiro", "Falso", "Depende do valor de p", "Inconclusivo"], "ans": 0},
+      {"q": "Numa tabela-verdade com três proposições (p, q, r), qual é o padrão de alternância da primeira coluna (p)?", "opts": ["Alterna V e F a cada linha", "Alterna de 2 em 2", "Alterna de 4 em 4 (4 Verdadeiros e 4 Falsos)", "São todas Verdadeiras"], "ans": 2},
+      {"q": "Qual a principal diferença entre a Disjunção Inclusiva (OU) e a Disjunção Exclusiva?", "opts": ["A inclusiva só é V se ambas forem V.", "A exclusiva é V apenas se UM fato ocorrer, mas não ambos em simultâneo.", "A exclusiva permite que ambos os factos ocorram.", "Não existe diferença na tabela-verdade."], "ans": 1},
+      {"q": "Qual é a ordem correta de precedência (resolução) numa tabela-verdade?", "opts": ["Conectivos > Negações > Parênteses", "Parênteses > Negações > Conjunção/Disjunção > Condicionais", "Condicionais > Parênteses > Negações", "Resolve-se da direita para a esquerda"], "ans": 1},
+      {"q": "Dada a expressão ~(p ^ ~q). Se 'p' for Verdadeiro e 'q' for Falso, qual será o resultado lógico final?", "opts": ["Verdadeiro", "Falso", "Nulo", "Ambos"], "ans": 1},
+      {"q": "A Teoria dos Grafos é um conceito matemático com qual aplicação prática na Computação?", "opts": ["Otimização de processadores de hardware", "Modelagem de redes sociais e planeamento de rotas (GPS)", "Fatoração de números primos em bancos de dados", "Criação de monitores de alta resolução"], "ans": 1},
+      {"q": "Por que motivo a 'Análise de Complexidade' é considerada vital para um programador?", "opts": ["Porque mede a eficiência de um algoritmo em termos de tempo de execução e espaço na memória.", "Porque torna o código-fonte mais bonito e legível.", "Porque evita erros de sintaxe (SyntaxError) no Python.", "Porque traduz o código para linguagem binária."], "ans": 0},
+      {"q": "Qual é o efeito do operador de Negação (~) sobre uma proposição?", "opts": ["Soma dois valores lógicos.", "Inverte o valor lógico (Se for V, torna-se F e vice-versa).", "Garante que o resultado seja sempre Falso.", "Transforma todas as letras em Maiúsculas."], "ans": 1},
+      {"q": "Quem desenvolveu a Álgebra Booleana no século XIX, criando a base para os computadores digitais modernos?", "opts": ["Alan Turing", "George Boole", "Isaac Newton", "Claude Shannon"], "ans": 1}
     ],
     "Programacao": [
       {"q": "O que representa o símbolo do Losango num Fluxograma?", "opts": ["Início do programa", "Processamento de dados", "Tomada de Decisão (Condicional)", "Fim do programa"], "ans": 2},
@@ -71,6 +101,16 @@
       {"q": "Qual é a estrutura condicional em Python executada caso todas as condições anteriores sejam falsas?", "opts": ["if", "elif", "else", "while"], "ans": 2},
       {"q": "Se x = '10' e y = '20', qual é o resultado de print(x + y) em Python?", "opts": ["30", "1020", "Erro de sintaxe", "0"], "ans": 1},
       {"q": "Qual é a estrutura de repetição que testa a condição ANTES de executar o bloco de código?", "opts": ["Repita... até", "Enquanto (While)", "Para (For)", "Se (If)"], "ans": 1}
+      {"q": "O que representa o símbolo do Losango num Fluxograma?", "opts": ["Início ou fim do programa", "Processamento de dados", "Tomada de Decisão (Condição)", "Entrada de dados pelo teclado"], "ans": 2},
+      {"q": "Qual a estrutura de repetição que deve ser usada quando JÁ SABEMOS previamente o número exato de repetições?", "opts": ["Enquanto (While)", "Repita... Até", "Se... Então", "Para... Até (For)"], "ans": 3},
+      {"q": "Qual é a definição correta de um Algoritmo?", "opts": ["Uma linguagem de programação moderna.", "Uma peça de hardware de processamento.", "Uma sequência de números aleatórios.", "Uma sequência finita de passos lógicos para resolver um problema."], "ans": 3},
+      {"q": "O Python possui a característica de 'Tipagem Dinâmica'. O que isso significa?", "opts": ["A linguagem descobre o tipo da variável automaticamente em tempo de execução.", "É obrigatório declarar 'int' ou 'string' antes de usar a variável.", "As variáveis não podem mudar de tipo.", "Os tipos mudam aleatoriamente."], "ans": 0},
+      {"q": "A função input() no Python, independentemente do que o utilizador digite, retorna sempre qual tipo de dado?", "opts": ["Inteiro (int)", "Decimal (float)", "Booleano (bool)", "Texto (String / str)"], "ans": 3},
+      {"q": "Para que serve o caractere '#' (cardinal/jogo-da-velha) num código em Python?", "opts": ["Para somar números", "Para criar comentários que serão ignorados pelo computador", "Para multiplicar variáveis", "Para formatar a saída de texto"], "ans": 1},
+      {"q": "Que função nativa do Python usamos para descobrir o tipo de dado de uma variável?", "opts": ["print()", "len()", "type()", "find()"], "ans": 2},
+      {"q": "Se x = '10' e y = '20' (ambos entre aspas), qual será o resultado exato de print(x + y) em Python?", "opts": ["30", "1020", "Erro de sintaxe (SyntaxError)", "0"], "ans": 1},
+      {"q": "Na estrutura condicional do Python, qual bloco é executado caso todas as condições anteriores (if e elif) sejam testadas como falsas?", "opts": ["for", "else", "while", "break"], "ans": 1},
+      {"q": "Qual é a característica da estrutura de repetição 'Enquanto' (While)?", "opts": ["Testa a condição ANTES de executar o bloco de código.", "Executa o código pelo menos uma vez e depois testa a condição no fim.", "Executa um número fixo e conhecido de vezes.", "Só funciona com números inteiros positivos."], "ans": 0}
     ]
   }
 }

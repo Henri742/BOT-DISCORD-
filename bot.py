@@ -25,7 +25,10 @@ except FileNotFoundError:
 def iniciar_banco():
     conn = sqlite3.connect('alunos.db')
     c = conn.cursor()
+    # Tabela de XP
     c.execute('''CREATE TABLE IF NOT EXISTS alunos (user_id TEXT PRIMARY KEY, xp INTEGER)''')
+    # Tabela de Histórico de Questões
+    c.execute('''CREATE TABLE IF NOT EXISTS questoes_resolvidas (user_id TEXT, materia TEXT, questao TEXT, UNIQUE(user_id, materia, questao))''')
     conn.commit()
     conn.close()
 
@@ -44,6 +47,29 @@ def pegar_xp(user_id):
     res = c.fetchone()
     conn.close()
     return res[0] if res else 0
+
+# --- NOVAS FUNÇÕES DO HISTÓRICO ---
+def registrar_questao(user_id, materia, questao_texto):
+    conn = sqlite3.connect('alunos.db')
+    c = conn.cursor()
+    c.execute('INSERT OR IGNORE INTO questoes_resolvidas VALUES (?, ?, ?)', (str(user_id), materia, questao_texto))
+    conn.commit()
+    conn.close()
+
+def pegar_resolvidas(user_id, materia):
+    conn = sqlite3.connect('alunos.db')
+    c = conn.cursor()
+    c.execute('SELECT questao FROM questoes_resolvidas WHERE user_id = ? AND materia = ?', (str(user_id), materia))
+    res = {linha[0] for linha in c.fetchall()} # Retorna um Set (conjunto) com os textos das questões
+    conn.close()
+    return res
+
+def resetar_resolvidas(user_id, materia):
+    conn = sqlite3.connect('alunos.db')
+    c = conn.cursor()
+    c.execute('DELETE FROM questoes_resolvidas WHERE user_id = ? AND materia = ?', (str(user_id), materia))
+    conn.commit()
+    conn.close()
 
 class GustavoLMS(commands.Bot):
     def __init__(self):
@@ -95,10 +121,11 @@ class PainelCursos(discord.ui.View):
         await i.response.send_message("Módulos de Lógica de Programação:", view=discord.ui.View().add_item(DropdownResumos("Programacao")), ephemeral=True)
 
 class ViewSimulado(discord.ui.View):
-    def __init__(self, user_id, questoes):
+    def __init__(self, user_id, questoes, materia): # <-- Adicionamos a matéria aqui
         super().__init__(timeout=600)
         self.user_id = user_id
         self.questoes = questoes
+        self.materia = materia
         self.total = len(questoes)
         self.atual = 0
         self.pontos = 0
@@ -112,6 +139,9 @@ class ViewSimulado(discord.ui.View):
             return
 
         q = self.questoes[self.atual]
+        # Salva a questão no banco de dados para não repetir mais!
+        registrar_questao(self.user_id, self.materia, q['q'])
+        
         embed = discord.Embed(title=f"Questão {self.atual + 1} / {self.total}", description=f"**{q['q']}**", color=0xe67e22)
         self.clear_items()
         
@@ -128,7 +158,6 @@ class ViewSimulado(discord.ui.View):
 
         if interaction.response.is_done(): await interaction.edit_original_response(embed=embed, view=self)
         else: await interaction.response.edit_message(embed=embed, view=self)
-
 
 # ==========================================
 # 🧩 JOGO TABELA-VERDADE (MINI-GAME)
@@ -191,18 +220,29 @@ async def hub(interaction: discord.Interaction):
         app_commands.Choice(name="Lógica Matemática", value="Matematica_Logica"),
         app_commands.Choice(name="Lógica de Programação", value="Programacao")
     ],
-    quantidade=[app_commands.Choice(name=str(i), value=i) for i in [5, 10, 15, 20, 25, 30]]
+    quantidade=[app_commands.Choice(name=str(i), value=i) for i in [2, 5, 10, 15, 20, 25, 30]]
 )
 async def simulado(interaction: discord.Interaction, materia: str, quantidade: int):
-    if materia not in DADOS["questoes"] or len(DADOS["questoes"][materia]) == 0:
-        return await interaction.response.send_message("❌ Ainda não há questões suficientes para esta matéria.", ephemeral=True)
+    banco_completo = DADOS["questoes"].get(materia, [])
+    if not banco_completo:
+        return await interaction.response.send_message("❌ Ainda não há questões para esta matéria.", ephemeral=True)
         
-    banco = DADOS["questoes"][materia]
-    qtd_real = min(quantidade, len(banco))
-    sorteadas = random.sample(banco, qtd_real)
+    # Pega as questões que o aluno já fez
+    resolvidas = pegar_resolvidas(interaction.user.id, materia)
+    # Filtra: Cria uma lista só com as questões INÉDITAS
+    banco_disponivel = [q for q in banco_completo if q['q'] not in resolvidas]
+
+    # Se o aluno já respondeu todas as questões dessa matéria
+    if not banco_disponivel:
+        resetar_resolvidas(interaction.user.id, materia)
+        banco_disponivel = banco_completo
+        await interaction.channel.send(f"🔄 Parabéns, {interaction.user.mention}! Você já havia resolvido todas as questões de **{materia}**. O seu histórico desta disciplina foi zerado para continuar treinando.")
+
+    qtd_real = min(quantidade, len(banco_disponivel))
+    sorteadas = random.sample(banco_disponivel, qtd_real)
     
-    view = ViewSimulado(interaction.user.id, sorteadas)
-    embed = discord.Embed(title="📝 Prova Iniciada", description=f"Disciplina: **{materia}**\nQuestões: **{qtd_real}**\nBoa sorte!", color=0xf1c40f)
+    view = ViewSimulado(interaction.user.id, sorteadas, materia)
+    embed = discord.Embed(title="📝 Prova Iniciada (Apenas Inéditas)", description=f"Disciplina: **{materia}**\nQuestões: **{qtd_real}**\nBoa sorte!", color=0xf1c40f)
     await interaction.response.send_message(embed=embed)
     await view.atualizar(interaction)
 
