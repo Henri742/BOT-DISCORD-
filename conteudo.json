@@ -1,0 +1,76 @@
+{
+  "resumos": {
+    "MA": {
+      "1. Números Reais": "🔢 **Números Reais:** É a união dos números Racionais (frações, decimais exatos e dízimas) com os Irracionais (raízes não exatas, Pi). Propriedades fundamentais: Fechamento, Comutatividade, Associatividade e Elemento Neutro.",
+      "2. Regras de Sinais": "➖ **Regras de Sinais:** Na multiplicação e divisão: Sinais iguais = Positivo (+); Sinais diferentes = Negativo (-). Exemplo: (-2) * (-3) = +6.",
+      "3. Potenciação": "⚡ **Potenciação:** \n• Multiplicação de bases iguais: Mantém a base e soma os expoentes.\n• Divisão de bases iguais: Mantém a base e subtrai os expoentes.\n• Potência de potência: Multiplicam-se os expoentes.",
+      "4. Radiciação": "🧮 **Radiciação:** A raiz n-ésima de uma potência corresponde a um expoente fracionário (ex: raiz quadrada de x³ = x^(3/2)). Raiz de uma raiz: multiplicam-se os índices.",
+      "5. Expressões e Polinómios": "🔤 **Expressões Algébricas:** Na adição e subtração de polinómios, operamos apenas os coeficientes dos termos semelhantes (aqueles com a mesma parte literal). Na multiplicação, multiplicamos coeficientes e somamos os expoentes das letras iguais."
+    },
+    "GT": {
+      "1. Gestão Ágil vs Clássica": "🚀 **A Virada de Chave:** A gerência clássica (Cascata) foca em controlo estrito e excesso de documentação, o que falha em TI porque o software é mutável. A Gestão Ágil foca em Colaboração, Adaptação rápida e valorização das Pessoas sobre os processos.",
+      "2. Reuniões Eficientes": "🗣️ **Reuniões:** Uma reunião produtiva tem um objetivo claro, uma pauta definida, começa e termina no horário estipulado, e envolve apenas as pessoas essenciais. Reunião sem objetivo é desperdício coletivo.",
+      "3. Documentação Mínima Viável": "📄 **Documentação:** Deve existir apenas o suficiente para a equipa entender e utilizar no dia a dia. Documentação extensa que não é lida ou atualizada não gera valor.",
+      "4. Uso de Ferramentas": "🛠️ **Ferramentas (Slack/Jira):** A ferramenta não resolve problemas por si só. Ter demasiadas aplicações sem regras claras gera confusão e perda de informação. O ideal são poucas ferramentas com processos bem definidos."
+    },
+    "Matematica_Logica": {
+      "1. Axiomas e Proposições": "⚖️ **Princípios:** \n1. Não Contradição: Uma proposição não pode ser V e F em simultâneo.\n2. Terceiro Excluído: Ou é V ou é F, não existe um terceiro valor. \nProposições simples não contêm outras proposições; as compostas usam conectivos.",
+      "2. Conectivos Lógicos": "🔗 **Conectivos:**\n• Conjunção (E / ^): Só é V se todas forem V.\n• Disjunção (OU / v): É V se pelo menos uma for V.\n• Condicional (->): Só é Falso se V -> F (Regra Vera Fischer).\n• Bicondicional (<->): É V se ambas tiverem o mesmo valor lógico.",
+      "3. Tabelas-Verdade": "📊 **Tabelas-Verdade:** A fórmula para calcular o número de linhas é L = 2^n (onde n é o número de proposições simples). A resolução deve ser feita sempre de dentro para fora (Parênteses > Negações > Conectivos)."
+    },
+    "Programacao": {
+      "1. Algoritmos e Fluxogramas": "🏗️ **Algoritmo:** Sequência finita de passos para resolver um problema. Pode ser representado graficamente por Fluxogramas (onde o Losango = Tomada de Decisão e o Retângulo = Processamento) ou por Pseudocódigo.",
+      "2. Estruturas de Repetição": "🔄 **Loops:**\n• Para... até (For): Usado quando o número de repetições é conhecido previamente.\n• Enquanto (While): Repete o bloco enquanto a condição for verdadeira (testa antes).\n• Repita... até: Executa pelo menos uma vez e testa a condição no fim.",
+      "3. Fundamentos de Python": "🐍 **Python:** Linguagem de tipagem dinâmica (não é necessário declarar o tipo de variável previamente). \n• input(): recebe dados como texto (String).\n• type(): verifica o tipo da variável.\n• # (cardinal): usado para inserir comentários ignorados pelo computador.",
+      "4. Estruturas Condicionais": "🔀 **Decisões em Python:** \n• if: testa a primeira condição.\n• elif: testa condições intermédias.\n• else: executado se todas as condições anteriores forem falsas."
+    }
+  },
+  "questoes": {
+    "Matematica_Aplicada": [
+      {"q": "O conjunto dos Números Reais é formado pela união de quais conjuntos?", "opts": ["Naturais e Inteiros", "Racionais e Irracionais", "Positivos e Negativos", "Pares e Ímpares"], "ans": 1},
+      {"q": "Na regra de sinais da multiplicação, (-) vezes (-) resulta em:", "opts": ["Negativo (-)", "Positivo (+)", "Neutro (0)", "Imaginário"], "ans": 1},
+      {"q": "Qual a regra para a multiplicação de potências com a mesma base?", "opts": ["Soma-se os expoentes", "Subtrai-se os expoentes", "Multiplica-se os expoentes", "Divide-se os expoentes"], "ans": 0},
+      {"q": "Ao dividir polinómios ou monómios, o que fazemos com os expoentes das variáveis iguais?", "opts": ["Somamos", "Subtraímos", "Multiplicamos", "Ignoramos"], "ans": 1},
+      {"q": "Como simplificamos a raiz de uma raiz (ex: raiz cúbica da raiz quadrada)?", "opts": ["Somamos os índices", "Subtraímos os índices", "Multiplicamos os índices", "Dividimos os índices"], "ans": 2},
+      {"q": "O que indica o 'Elemento Neutro' da adição?", "opts": ["O número 1", "O número zero (0)", "O número negativo", "A fração 1/2"], "ans": 1},
+      {"q": "Na divisão de frações, qual é o procedimento correto?", "opts": ["Divide-se os numeradores e os denominadores", "Mantém-se a primeira e multiplica-se pelo inverso da segunda", "Soma-se os numeradores", "Multiplica-se em linha reta diretamente"], "ans": 1},
+      {"q": "Qual é o valor do módulo de |-7|?", "opts": ["-7", "0", "7", "1/7"], "ans": 2},
+      {"q": "Em expressões algébricas, apenas podemos somar ou subtrair termos que sejam:", "opts": ["Positivos", "Semelhantes (mesma parte literal)", "Inteiros", "Diferentes"], "ans": 1},
+      {"q": "A propriedade comutativa da adição afirma que:", "opts": ["a + b = b + a", "a * b = b * a", "a + 0 = a", "a + (-a) = 0"], "ans": 0}
+    ],
+    "Gestao_Times": [
+      {"q": "Qual o foco principal da Gestão Ágil?", "opts": ["Microgestão", "Foco em documentação pesada", "Adaptação e colaboração", "Seguir o plano inicial cegamente"], "ans": 2},
+      {"q": "O que caracteriza uma Reunião Ruim?", "opts": ["Ter um objetivo claro", "Começar no horário", "Não ter pauta definida e durar muito", "Envolver apenas as pessoas necessárias"], "ans": 2},
+      {"q": "Por que motivo a 'Gerência Clássica' (cascata) falha frequentemente em projetos de TI?", "opts": ["Porque é muito rápida", "Porque exige que o cliente saiba tudo no início e o software é mutável", "Porque tem poucos documentos", "Porque não tem gestor"], "ans": 1},
+      {"q": "O que se entende por 'Documentação Mínima Viável'?", "opts": ["Não ter documento nenhum", "Documentar absolutamente tudo em PDFs", "Criar apenas o suficiente para a equipa entender e usar no dia a dia", "Documento escrito exclusivamente pelo chefe"], "ans": 2},
+      {"q": "Qual é o principal problema de usar 'Muitas Ferramentas' sem regras definidas?", "opts": ["Comunicação confusa e informações dispersas", "Aumenta a velocidade da equipa", "Melhora a liderança", "Reduz o número de reuniões"], "ans": 0},
+      {"q": "Segundo a Gestão Ágil, o desenvolvimento de software deve ser encarado como um trabalho:", "opts": ["Previsível e mecânico", "Linha de montagem", "Criativo e baseado em conhecimento", "Estático e inalterável"], "ans": 2},
+      {"q": "Uma boa prática de comunicação numa equipa moderna é:", "opts": ["Marcar reuniões para qualquer assunto", "Usar o Slack de forma desorganizada", "Registar as decisões importantes de forma acessível", "Evitar o contacto entre os membros"], "ans": 2},
+      {"q": "No contexto ágil, o papel do gestor deve focar-se mais em:", "opts": ["Controlar os horários de entrada e saída", "Atuar como um líder facilitador que remove obstáculos", "Ditar cada linha de código", "Criar relatórios de desempenho diários"], "ans": 1}
+    ],
+    "Matematica_Logica": [
+      {"q": "O que afirma o Princípio do Terceiro Excluído?", "opts": ["Uma proposição pode ser V e F.", "Ou é V ou é F, não existe uma terceira opção.", "Toda a proposição composta é V.", "Depende da tabela-verdade."], "ans": 1},
+      {"q": "A proposição 'Maceió é a capital de Alagoas' é classificada como:", "opts": ["Proposição Molecular", "Proposição Composta", "Proposição Atômica (Simples)", "Não é uma proposição"], "ans": 2},
+      {"q": "Qual a regra principal da Conjunção (E / ^)?", "opts": ["Só é V se tudo for V.", "É V se pelo menos um for V.", "Só é F se for V -> F.", "Inverte o valor original."], "ans": 0},
+      {"q": "Na Condicional (->), qual é o único caso em que o resultado é Falso?", "opts": ["F -> F", "V -> V", "F -> V", "V -> F (Regra Vera Fischer)"], "ans": 3},
+      {"q": "Quantas linhas tem a tabela-verdade da proposição composta: ~p v (q ^ r)?", "opts": ["4 linhas", "6 linhas", "8 linhas", "9 linhas"], "ans": 2},
+      {"q": "O conectivo '~' (til) tem qual função lógica?", "opts": ["Somar valores", "Multiplicar", "Negação (Inverter o valor lógico)", "Condicionar proposições"], "ans": 2},
+      {"q": "No cálculo proposicional, a Bicondicional (<->) é verdadeira quando:", "opts": ["Os valores lógicos são diferentes.", "O primeiro é V e o segundo é F.", "Os valores lógicos de ambas são iguais.", "Tudo for falso."], "ans": 2},
+      {"q": "Qual é a base fundamental para o projeto de circuitos digitais e computadores modernos?", "opts": ["Teoria dos Grafos", "Álgebra Booleana", "Cálculo Diferencial", "Geometria Analítica"], "ans": 1},
+      {"q": "O Princípio da Não Contradição estabelece que:", "opts": ["Tudo é falso.", "Uma proposição não pode ser verdadeira e falsa ao mesmo tempo.", "Existem três valores lógicos.", "A negação de V é V."], "ans": 1},
+      {"q": "Como se traduz a expressão lógica ~p ^ ~q para a linguagem natural (p: 'está quente', q: 'está chovendo')?", "opts": ["Está quente e chovendo", "Não está quente ou não está chovendo", "Não está quente e não está chovendo", "Se não está quente, não está chovendo"], "ans": 2}
+    ],
+    "Programacao": [
+      {"q": "O que representa o símbolo do Losango num Fluxograma?", "opts": ["Início do programa", "Processamento de dados", "Tomada de Decisão (Condicional)", "Fim do programa"], "ans": 2},
+      {"q": "Qual a estrutura de repetição que deve ser usada quando JÁ SABEMOS o número exato de repetições?", "opts": ["Enquanto (While)", "Repita... Até", "Se... Então", "Para... Até (For)"], "ans": 3},
+      {"q": "O que define corretamente um Algoritmo?", "opts": ["Uma linguagem de programação como o Python.", "Uma peça de hardware do computador.", "Uma sequência de números aleatórios.", "Uma sequência finita de passos para resolver um problema."], "ans": 3},
+      {"q": "Qual a principal característica do Python em relação aos tipos de variáveis?", "opts": ["Tipagem Dinâmica", "Tipagem Estática", "Não utiliza variáveis", "Exige declarar 'int' e 'string' manualmente"], "ans": 0},
+      {"q": "A função input() no Python retorna, por padrão, que tipo de dado?", "opts": ["Inteiro (int)", "Decimal (float)", "Booleano (bool)", "Texto (string/str)"], "ans": 3},
+      {"q": "Para que serve o caractere '#' na linguagem Python?", "opts": ["Somar números", "Inserir comentários que são ignorados pelo código", "Multiplicar variáveis", "Criar listas de dados"], "ans": 1},
+      {"q": "Como descobrimos o tipo de uma variável em Python?", "opts": ["print()", "len()", "type()", "find()"], "ans": 2},
+      {"q": "Qual é a estrutura condicional em Python executada caso todas as condições anteriores sejam falsas?", "opts": ["if", "elif", "else", "while"], "ans": 2},
+      {"q": "Se x = '10' e y = '20', qual é o resultado de print(x + y) em Python?", "opts": ["30", "1020", "Erro de sintaxe", "0"], "ans": 1},
+      {"q": "Qual é a estrutura de repetição que testa a condição ANTES de executar o bloco de código?", "opts": ["Repita... até", "Enquanto (While)", "Para (For)", "Se (If)"], "ans": 1}
+    ]
+  }
+}
