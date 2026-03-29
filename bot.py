@@ -1,42 +1,47 @@
 import discord
 from discord.ext import commands
-import aiohttp
-import os
+import google.generativeai as genai
+import os, json
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# CONFIGURAÇÕES
-GEMINI_KEY = os.getenv("GEMINI_API_KEY")
-# A URL direta para a versão estável v1 (sem beta!)
-URL = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={GEMINI_KEY}"
+# CONFIGURAÇÃO
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+# Usando o modelo flash (mais rápido e estável)
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-async def chamar_gemini(pergunta):
-    payload = {
-        "contents": [{"parts": [{"text": pergunta}]}]
-    }
-    async with aiohttp.ClientSession() as session:
-        async with session.post(URL, json=payload) as resp:
-            if resp.status == 200:
-                data = await resp.json()
-                return data['candidates'][0]['content']['parts'][0]['text']
-            else:
-                erro = await resp.text()
-                return f"❌ Erro na API: {resp.status}\n{erro[:100]}"
+# MEMÓRIA SIMPLES
+user_memory = {}
 
 @bot.event
 async def on_ready():
     await bot.tree.sync()
-    print("✅ GUSTAVO BOT ONLINE - VIA HTTP DIRETO")
+    print(f"✅ GUSTAVO BOT ONLINE - O GEMINI FINAL!")
 
-@bot.tree.command(name="ai", description="Conversar")
+@bot.tree.command(name="ai", description="Conversar com a IA")
 async def ai(interaction: discord.Interaction, pergunta: str):
     await interaction.response.defer()
-    resposta = await chamar_gemini(pergunta)
-    await interaction.followup.send(resposta[:1900])
+    
+    try:
+        # Recupera o que foi dito antes
+        history = user_memory.get(str(interaction.user.id), "")
+        prompt_completo = f"{history}\nUsuário: {pergunta}"
+        
+        response = model.generate_content(prompt_completo)
+        resposta_texto = response.text
+        
+        # Salva na memória (últimas conversas)
+        user_memory[str(interaction.user.id)] = f"Usuário: {pergunta}\nBot: {resposta_texto}"[-1000:]
+        
+        await interaction.followup.send(resposta_texto[:1900])
+        
+    except Exception as e:
+        print(f"ERRO: {e}")
+        await interaction.followup.send(f"❌ Erro: {e}")
 
 bot.run(os.getenv("DISCORD_TOKEN"))
