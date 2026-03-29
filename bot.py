@@ -24,7 +24,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 # Ajuste do MODEL_ID com prefixo para evitar Erro 404
-MODEL_ID = "models/gemini-1.5-flash" 
+MODEL_ID = "gemini-1.5-flash-002"
 
 # ========================
 # MEMÓRIA PERSISTENTE
