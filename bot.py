@@ -21,10 +21,12 @@ DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # Novo Cliente SDK 2026
-client = genai.Client(api_key=GEMINI_API_KEY)
+client = genai.Client(
+    api_key=GEMINI_API_KEY,
+    http_options={'api_version': 'v1'}
 
 # Ajuste do MODEL_ID com prefixo para evitar Erro 404
-MODEL_ID = "gemini-1.5-flash-002"
+MODEL_ID = "gemini-1.5-flash"
 
 # ========================
 # MEMÓRIA PERSISTENTE
