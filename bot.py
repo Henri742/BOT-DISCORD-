@@ -333,4 +333,13 @@ async def limpar_chat(interaction: discord.Interaction, quantidade: int):
     apagadas = await interaction.channel.purge(limit=quantidade)
     await interaction.followup.send(f"🧹 Chat limpo. {len(apagadas)} mensagens eliminadas.", ephemeral=True)
 
+@bot.tree.command(name="backup", description="Baixa o arquivo do banco de dados (Apenas Admins).")
+@app_commands.checks.has_permissions(administrator=True) # Só você e outros admins podem usar
+async def backup(interaction: discord.Interaction):
+    try:
+        # Envia o arquivo alunos.db direto no chat, visível só para você (ephemeral)
+        await interaction.response.send_message("📦 Aqui está o backup mais recente do banco de dados:", file=discord.File('alunos.db'), ephemeral=True)
+    except Exception as e:
+        await interaction.response.send_message(f"❌ Erro ao gerar backup: {e}", ephemeral=True)
+
 bot.run(os.getenv("DISCORD_TOKEN"))
