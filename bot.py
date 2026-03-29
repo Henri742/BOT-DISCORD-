@@ -10,9 +10,8 @@ load_dotenv()
 
 # 2. Configurações da API
 GEMINI_KEY = os.getenv("GEMINI_API_KEY")
-# MUDANÇA CRUCIAL: Usando v1beta que é a porta correta para o Flash no AI Studio
-URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_KEY}"
-
+# Tente esta versão (Removendo o prefixo models/ que às vezes duplica internamente)
+URL = f"https://generativelanguage.googleapis.com/v1beta/gemini-1.5-flash:generateContent?key={GEMINI_KEY}"
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
