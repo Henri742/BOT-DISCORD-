@@ -13,16 +13,18 @@ from collections import defaultdict
 from pypdf import PdfReader
 
 # ========================
-# CARREGAR ENV E CONFIG
+# CONFIGURAÇÕES INICIAIS
 # ========================
 load_dotenv()
 
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# Novo Cliente do Gemini (SDK 2026)
+# Novo Cliente SDK 2026
 client = genai.Client(api_key=GEMINI_API_KEY)
-MODEL_ID = "gemini-1.5-flash" 
+
+# Ajuste do MODEL_ID com prefixo para evitar Erro 404
+MODEL_ID = "models/gemini-1.5-flash" 
 
 # ========================
 # MEMÓRIA PERSISTENTE
@@ -32,7 +34,7 @@ MEMORY_FILE = "memory.json"
 try:
     with open(MEMORY_FILE, "r") as f:
         user_memory = json.load(f)
-except Exception:
+except:
     user_memory = {}
 
 MEMORY_LIMIT = 10
@@ -63,11 +65,11 @@ def anti_spam(user_id):
 async def perguntar_gemini(user_id, pergunta, multimidia=None):
     history = user_memory.get(str(user_id), [])
     
-    # Prepara o conteúdo (texto ou texto + mídia)
+    # Se houver imagem/arquivo, enviamos sem o histórico para evitar confusão do modelo
     if multimidia:
         contents = [pergunta, multimidia]
     else:
-        # Monta o contexto da memória para o prompt
+        # Chat normal com memória
         history.append(f"Usuário: {pergunta}")
         if len(history) > MEMORY_LIMIT:
             history.pop(0)
@@ -80,10 +82,10 @@ async def perguntar_gemini(user_id, pergunta, multimidia=None):
         )
         resposta = response.text
     except Exception as e:
-        print(f"ERRO GEMINI ({user_id}):", e)
-        resposta = "❌ Erro ao processar sua solicitação."
+        print(f"ERRO GEMINI NO USUÁRIO {user_id}: {e}")
+        resposta = "❌ Erro ao processar sua solicitação no servidor do Google."
 
-    # Só salva na memória se for uma conversa de texto normal
+    # Salva na memória apenas conversas de texto
     if not multimidia:
         history.append(f"Bot: {resposta}")
         user_memory[str(user_id)] = history
@@ -92,7 +94,7 @@ async def perguntar_gemini(user_id, pergunta, multimidia=None):
     return resposta[:1900]
 
 # ========================
-# COMANDOS
+# COMANDOS SLASH (/)
 # ========================
 
 @bot.event
@@ -100,61 +102,77 @@ async def on_ready():
     await bot.tree.sync()
     print(f"✅ {bot.user} online com SDK google-genai!")
 
-@bot.tree.command(name="ai", description="Pergunte qualquer coisa")
+@bot.tree.command(name="ai", description="Chat livre com a IA")
 async def ai(interaction: discord.Interaction, pergunta: str):
     if not anti_spam(interaction.user.id):
-        return await interaction.response.send_message("⏳ Calma! Espere o cooldown.", ephemeral=True)
+        return await interaction.response.send_message("⏳ Espere 4 segundos entre as mensagens.", ephemeral=True)
     
     await interaction.response.defer()
     resposta = await perguntar_gemini(interaction.user.id, pergunta)
     await interaction.followup.send(resposta)
 
-@bot.tree.command(name="resolver_imagem", description="Resolver por imagem")
+@bot.tree.command(name="explicar", description="Explica um tema de forma simples")
+async def explicar(interaction: discord.Interaction, tema: str):
+    await interaction.response.defer()
+    prompt = f"Explique de forma muito simples e didática: {tema}"
+    await interaction.followup.send(await perguntar_gemini(interaction.user.id, prompt))
+
+@bot.tree.command(name="resolver", description="Resolve exercícios passo a passo")
+async def resolver(interaction: discord.Interaction, problema: str):
+    await interaction.response.defer()
+    prompt = f"Resolva passo a passo, explicando a lógica: {problema}"
+    await interaction.followup.send(await perguntar_gemini(interaction.user.id, prompt))
+
+@bot.tree.command(name="codigo", description="Gera ou analisa códigos")
+async def codigo(interaction: discord.Interaction, pedido: str):
+    await interaction.response.defer()
+    prompt = f"Aja como um programador sênior. {pedido}"
+    await interaction.followup.send(await perguntar_gemini(interaction.user.id, prompt))
+
+@bot.tree.command(name="prova", description="Gera uma mini prova de 5 questões")
+async def prova(interaction: discord.Interaction, tema: str):
+    await interaction.response.defer()
+    prompt = f"Crie uma mini prova sobre {tema} com 5 questões de múltipla escolha e o gabarito no final."
+    await interaction.followup.send(await perguntar_gemini(interaction.user.id, prompt))
+
+@bot.tree.command(name="resolver_imagem", description="Resolve exercício por foto")
 async def resolver_imagem(interaction: discord.Interaction, imagem: discord.Attachment):
     await interaction.response.defer()
     img_bytes = await imagem.read()
     
-    mídia = types.Part.from_bytes(data=img_bytes, mime_type=imagem.content_type)
-    resposta = await perguntar_gemini(interaction.user.id, "Resolva passo a passo este exercício da imagem:", multimidia=mídia)
+    # Formatação correta para o novo SDK
+    midia = types.Part.from_bytes(data=img_bytes, mime_type=imagem.content_type)
+    resposta = await perguntar_gemini(interaction.user.id, "Resolva este exercício da imagem detalhadamente:", multimidia=midia)
     await interaction.followup.send(resposta)
 
-@bot.tree.command(name="resolver_pdf", description="Resolver de PDF")
+@bot.tree.command(name="resolver_pdf", description="Lê e resolve questões de um PDF")
 async def resolver_pdf(interaction: discord.Interaction, pdf: discord.Attachment):
     await interaction.response.defer()
     file = await pdf.read()
     reader = PdfReader(io.BytesIO(file))
-    texto = "".join([p.extract_text() for p in reader.pages])
+    texto_completo = ""
+    for page in reader.pages:
+        texto_completo += page.extract_text()
     
-    resposta = await perguntar_gemini(interaction.user.id, f"Resolva os exercícios deste PDF:\n{texto[:6000]}")
-    await interaction.followup.send(resposta)
+    prompt = f"Analise o texto deste PDF e resolva os exercícios encontrados:\n{texto_completo[:6000]}"
+    await interaction.followup.send(await perguntar_gemini(interaction.user.id, prompt))
 
-# Comandos de atalho (Explicar, Resolver, Código, etc)
-@bot.tree.command(name="explicar", description="Explica algo simples")
-async def explicar(interaction: discord.Interaction, tema: str):
-    await interaction.response.defer()
-    await interaction.followup.send(await perguntar_gemini(interaction.user.id, f"Explique de forma simples: {tema}"))
-
-@bot.tree.command(name="prova", description="Gerar mini prova")
-async def prova(interaction: discord.Interaction, tema: str):
-    await interaction.response.defer()
-    p = f"Crie uma mini prova com 5 questões, 4 alternativas e gabarito sobre: {tema}"
-    await interaction.followup.send(await perguntar_gemini(interaction.user.id, p))
-
-@bot.tree.command(name="helpgust", description="Comandos")
+@bot.tree.command(name="helpgust", description="Mostra o guia de comandos")
 async def helpgust(interaction: discord.Interaction):
-    embed = discord.Embed(title="🤖 GUSTAVO BOT", color=0x2ecc71)
-    embed.add_field(name="Comandos", value="/ai, /explicar, /prova, /resolver_imagem, /resolver_pdf")
+    embed = discord.Embed(
+        title="🤖 GUSTAVO BOT - Guia de Ajuda",
+        description="Dúvidas? Aqui estão meus comandos:",
+        color=0x2ecc71
+    )
+    embed.add_field(name="💬 Chat", value="`/ai`: Conversa geral com memória.", inline=False)
+    embed.add_field(name="📖 Estudo", value="`/explicar`: Resumos didáticos.\n`/resolver`: Problemas escritos.\n`/prova`: Mini simulados.", inline=False)
+    embed.add_field(name="📁 Arquivos", value="`/resolver_imagem`: Mande foto da questão.\n`/resolver_pdf`: Analisa documentos PDF.", inline=False)
+    embed.add_field(name="💻 Dev", value="`/codigo`: Ajuda com programação.", inline=False)
+    embed.set_footer(text="IA: Gemini 1.5 Flash")
     await interaction.response.send_message(embed=embed)
 
 # ========================
-# EXECUÇÃO
+# START
 # ========================
-async def main():
-    try:
-        await bot.start(DISCORD_TOKEN)
-    except Exception as e:
-        print(f"⚠️ Erro: {e}. Reiniciando...")
-        await asyncio.sleep(10)
-
 if __name__ == "__main__":
-    asyncio.run(main())
+    bot.run(DISCORD_TOKEN)
