@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
-import google.generativeai as genai
-import os, json, io, time
+from google import genai
+import os, json, io
 from dotenv import load_dotenv
 from pypdf import PdfReader
 
@@ -10,25 +10,29 @@ from pypdf import PdfReader
 # ========================
 load_dotenv()
 
-# Configuração simples que evita erros de versão
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-model = genai.GenerativeModel("gemini-1.5-flash")
+# O SEGREDO: Criamos o cliente SEM especificar nada de v1beta
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+MODEL_ID = "gemini-1.5-flash"
 
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 # ========================
-# FUNÇÃO DE RESPOSTA (SIMPLIFICADA)
+# FUNÇÃO NÚCLEO
 # ========================
 async def perguntar_gemini(pergunta):
     try:
-        # Enviamos apenas a string direta para evitar o erro 400 de argumento inválido
-        response = model.generate_content(pergunta)
+        # Usamos o método mais moderno do SDK 2026
+        response = client.models.generate_content(
+            model=MODEL_ID,
+            contents=pergunta
+        )
         return response.text
     except Exception as e:
-        print(f"ERRO NOS LOGS: {e}")
-        return "❌ O Google recebeu o pedido, mas algo deu errado. Tente novamente em instantes."
+        # Se der erro, vamos ver exatamente qual é no log
+        print(f"ERRO NO GEMINI: {e}")
+        return "❌ Erro de conexão. Verifique os logs no Railway."
 
 # ========================
 # COMANDOS
@@ -36,7 +40,7 @@ async def perguntar_gemini(pergunta):
 @bot.event
 async def on_ready():
     await bot.tree.sync()
-    print(f"✅ GUSTAVO BOT ONLINE - CONEXÃO VALIDADA!")
+    print(f"✅ GUSTAVO BOT ONLINE - SDK 2026 ATIVO")
 
 @bot.tree.command(name="ai", description="Conversar com a IA")
 async def ai(interaction: discord.Interaction, pergunta: str):
@@ -46,6 +50,6 @@ async def ai(interaction: discord.Interaction, pergunta: str):
 
 @bot.tree.command(name="helpgust", description="Ver comandos")
 async def helpgust(interaction: discord.Interaction):
-    await interaction.response.send_message("🤖 Comandos ativos: `/ai`, `/helpgust`")
+    await interaction.response.send_message("🤖 Comandos: `/ai`, `/helpgust`")
 
 bot.run(os.getenv("DISCORD_TOKEN"))
