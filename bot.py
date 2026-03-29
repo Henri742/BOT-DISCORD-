@@ -23,17 +23,19 @@ except FileNotFoundError:
     DADOS = {"resumos": {}, "questoes": {}}
 
 def iniciar_banco():
-    conn = sqlite3.connect('alunos.db')
+    # Verifica se a pasta existe no sistema do Railway
+    if not os.path.exists('/data'):
+        os.makedirs('/data')
+        
+    conn = sqlite3.connect('/data/alunos.db') # Note a barra antes do data
     c = conn.cursor()
-    # Tabela de XP
     c.execute('''CREATE TABLE IF NOT EXISTS alunos (user_id TEXT PRIMARY KEY, xp INTEGER)''')
-    # Tabela de Histórico de Questões
     c.execute('''CREATE TABLE IF NOT EXISTS questoes_resolvidas (user_id TEXT, materia TEXT, questao TEXT, UNIQUE(user_id, materia, questao))''')
     conn.commit()
     conn.close()
 
 def adicionar_xp(user_id, pontos):
-    conn = sqlite3.connect('alunos.db')
+    conn = sqlite3.connect('/data/alunos.db')
     c = conn.cursor()
     c.execute('''INSERT INTO alunos (user_id, xp) VALUES (?, ?) 
                  ON CONFLICT(user_id) DO UPDATE SET xp = xp + ?''', (str(user_id), pontos, pontos))
@@ -41,7 +43,7 @@ def adicionar_xp(user_id, pontos):
     conn.close()
 
 def pegar_xp(user_id):
-    conn = sqlite3.connect('alunos.db')
+    conn = sqlite3.connect('/data/alunos.db')
     c = conn.cursor()
     c.execute('SELECT xp FROM alunos WHERE user_id = ?', (str(user_id),))
     res = c.fetchone()
