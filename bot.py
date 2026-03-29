@@ -129,17 +129,19 @@ class ViewSimulado(discord.ui.View):
         if interaction.response.is_done(): await interaction.edit_original_response(embed=embed, view=self)
         else: await interaction.response.edit_message(embed=embed, view=self)
 
+
 # ==========================================
 # 🧩 JOGO TABELA-VERDADE (MINI-GAME)
 # ==========================================
-class ModalTabelaVerdade(discord.ui.Modal, title='Preencha a Tabela-Verdade'):
-    l1 = discord.ui.TextInput(label='Linha 1 (V e V)', max_length=1, placeholder="V ou F")
-    l2 = discord.ui.TextInput(label='Linha 2 (V e F)', max_length=1, placeholder="V ou F")
-    l3 = discord.ui.TextInput(label='Linha 3 (F e V)', max_length=1, placeholder="V ou F")
-    l4 = discord.ui.TextInput(label='Linha 4 (F e F)', max_length=1, placeholder="V ou F")
+class ModalTabelaVerdade(discord.ui.Modal):
+    l1 = discord.ui.TextInput(label='1. Quando p=V, q=V', max_length=1, placeholder="V ou F")
+    l2 = discord.ui.TextInput(label='2. Quando p=V, q=F', max_length=1, placeholder="V ou F")
+    l3 = discord.ui.TextInput(label='3. Quando p=F, q=V', max_length=1, placeholder="V ou F")
+    l4 = discord.ui.TextInput(label='4. Quando p=F, q=F', max_length=1, placeholder="V ou F")
 
-    def __init__(self, exp, resp_certa):
-        super().__init__()
+    def __init__(self, titulo, exp, resp_certa):
+        # O título do Modal agora mostra a operação exata
+        super().__init__(title=titulo[:45])
         self.exp = exp
         self.resp_certa = resp_certa
 
@@ -147,9 +149,11 @@ class ModalTabelaVerdade(discord.ui.Modal, title='Preencha a Tabela-Verdade'):
         resp_user = [self.l1.value.upper(), self.l2.value.upper(), self.l3.value.upper(), self.l4.value.upper()]
         if resp_user == self.resp_certa:
             adicionar_xp(interaction.user.id, 30)
-            await interaction.response.send_message(f"✅ Correto! Você resolveu **{self.exp}** e ganhou 30 XP permanentes.")
+            await interaction.response.send_message(f"✅ Correto! Você resolveu **{self.exp}** e ganhou 30 XP.")
         else:
-            await interaction.response.send_message(f"❌ Errou! O gabarito de **{self.exp}** era: {', '.join(self.resp_certa)}", ephemeral=True)
+            await interaction.response.send_message(f"❌ Errou! O gabarito de **{self.exp}** era: {', '.join(self.resp_certa)}\nVocê digitou: {', '.join(resp_user)}", ephemeral=True)
+
+
 
 # ==========================================
 # 🚀 COMANDOS DO BOT (SLASH COMMANDS)
@@ -218,15 +222,35 @@ async def calcular(interaction: discord.Interaction, n1: float, operacao: str, n
     except ZeroDivisionError:
         await interaction.response.send_message("❌ Erro: É impossível dividir por zero!", ephemeral=True)
 
+# ==========================================
+# (Procure o comando /tabela_verdade lá embaixo e substitua por este:)
+# ==========================================
 @bot.tree.command(name="tabela_verdade", description="Treine o preenchimento dos valores da tabela-verdade.")
 async def tabela_verdade(interaction: discord.Interaction):
     desafios = [
-        {"exp": "p ^ q (Conjunção)", "resp": ["V", "F", "F", "F"]},
-        {"exp": "p v q (Disjunção)", "resp": ["V", "V", "V", "F"]},
-        {"exp": "p -> q (Condicional)", "resp": ["V", "F", "V", "V"]}
+        # Conjunção (E / ^)
+        {"titulo": "Conjunção: p ^ q", "exp": "p ^ q", "resp": ["V", "F", "F", "F"]},
+        {"titulo": "Conjunção: ~p ^ q", "exp": "~p ^ q", "resp": ["F", "F", "V", "F"]},
+        {"titulo": "Conjunção: p ^ ~q", "exp": "p ^ ~q", "resp": ["F", "V", "F", "F"]},
+        
+        # Disjunção (OU / v)
+        {"titulo": "Disjunção: p v q", "exp": "p v q", "resp": ["V", "V", "V", "F"]},
+        {"titulo": "Disjunção: ~p v q", "exp": "~p v q", "resp": ["V", "F", "V", "V"]},
+        {"titulo": "Disjunção: p v ~q", "exp": "p v ~q", "resp": ["V", "V", "F", "V"]},
+        
+        # Condicional (Se... então / ->)
+        {"titulo": "Condicional: p -> q", "exp": "p -> q", "resp": ["V", "F", "V", "V"]},
+        {"titulo": "Condicional: ~p -> q", "exp": "~p -> q", "resp": ["V", "V", "V", "F"]},
+        {"titulo": "Condicional: p -> ~q", "exp": "p -> ~q", "resp": ["F", "V", "V", "V"]},
+        
+        # Bicondicional (Se e somente se / <->)
+        {"titulo": "Bicondicional: p <-> q", "exp": "p <-> q", "resp": ["V", "F", "F", "V"]},
+        {"titulo": "Bicondicional: ~p <-> q", "exp": "~p <-> q", "resp": ["F", "V", "V", "F"]},
+        {"titulo": "Bicondicional: p <-> ~q", "exp": "p <-> ~q", "resp": ["F", "V", "V", "F"]}
     ]
     escolhido = random.choice(desafios)
-    await interaction.response.send_modal(ModalTabelaVerdade(escolhido["exp"], escolhido["resp"]))
+    await interaction.response.send_modal(ModalTabelaVerdade(escolhido["titulo"], escolhido["exp"], escolhido["resp"]))
+
 
 @bot.tree.command(name="pomodoro", description="Timer de foco personalizado para os seus estudos.")
 async def pomodoro(interaction: discord.Interaction, minutos: int):
