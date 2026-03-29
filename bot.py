@@ -10,7 +10,8 @@ load_dotenv()
 # 2. Configurações da API
 # No seu bot.py, a linha da URL deve estar assim:
 GEMINI_KEY = os.getenv("GEMINI_API_KEY")
-URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_KEY}"
+# Adicionamos o '-001' que é o ID técnico do modelo Flash
+URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-001:generateContent?key={GEMINI_KEY}"
 
 # 3. CONFIGURAÇÃO DAS INTENTS (Onde estava o erro!)
 intents = discord.Intents.default()
