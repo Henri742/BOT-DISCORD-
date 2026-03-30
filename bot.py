@@ -63,13 +63,13 @@ class DropdownResumos(discord.ui.Select):
         # Mapeamento de nomes amigáveis
         # Dentro de class DropdownResumos:
     nomes = {
-    "MA": "Matemática Aplicada", 
-    "GT": "Gestão de Times", 
-    "Matematica_Logica": "Lógica Matemática", 
-    "Programacao": "Lógica de Programação"
+        "MA": "Matemática Aplicada", 
+        "GT": "Gestão de Times", 
+        "Matematica_Logica": "Lógica Matemática", 
+        "Programacao": "Lógica de Programação"
 }
-        opcoes = [discord.SelectOption(label=k) for k in DADOS["resumos"].get(curso, {}).keys()] or [discord.SelectOption(label="Vazio")]
-        super().__init__(placeholder=f"Resumos de {nomes.get(curso, curso)}...", options=opcoes)
+    opcoes = [discord.SelectOption(label=k) for k in DADOS["resumos"].get(curso, {}).keys()] or [discord.SelectOption(label="Vazio")]
+    super().__init__(placeholder=f"Resumos de {nomes.get(curso, curso)}...", options=opcoes)
 
     async def callback(self, interaction: discord.Interaction):
         texto = DADOS["resumos"][self.curso].get(self.values[0], "Conteúdo não encontrado.")
