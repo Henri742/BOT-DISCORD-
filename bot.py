@@ -36,6 +36,17 @@ def pegar_xp(user_id):
     c.execute('SELECT xp FROM alunos WHERE user_id = ?', (str(user_id),)); res = c.fetchone(); conn.close()
     return res[0] if res else 0
 
+def registrar_questao(user_id, materia, questao_texto):
+    conn = sqlite3.connect(DB_PATH); c = conn.cursor()
+    c.execute('INSERT OR IGNORE INTO questoes_resolvidas VALUES (?, ?, ?)', (str(user_id), materia, questao_texto))
+    conn.commit(); conn.close()
+
+def pegar_resolvidas(user_id, materia):
+    conn = sqlite3.connect(DB_PATH); c = conn.cursor()
+    c.execute('SELECT questao FROM questoes_resolvidas WHERE user_id = ? AND materia = ?', (str(user_id), materia))
+    res = {linha[0] for linha in c.fetchall()}; conn.close()
+    return res
+
 # ==========================================
 # 🖥️ COMPONENTES VISUAIS (SIMULADO E HUB)
 # ==========================================
@@ -50,7 +61,13 @@ class DropdownResumos(discord.ui.Select):
     def __init__(self, curso):
         self.curso = curso
         # Mapeamento de nomes amigáveis
-        nomes = {"MA": "Matemática Aplicada", "GT": "Gestão de Times", "POO": "Prog. Orientada a Objetos", "BD": "Banco de Dados"}
+        # Dentro de class DropdownResumos:
+    nomes = {
+    "MA": "Matemática Aplicada", 
+    "GT": "Gestão de Times", 
+    "Matematica_Logica": "Lógica Matemática", 
+    "Programacao": "Lógica de Programação"
+}
         opcoes = [discord.SelectOption(label=k) for k in DADOS["resumos"].get(curso, {}).keys()] or [discord.SelectOption(label="Vazio")]
         super().__init__(placeholder=f"Resumos de {nomes.get(curso, curso)}...", options=opcoes)
 
@@ -58,20 +75,28 @@ class DropdownResumos(discord.ui.Select):
         texto = DADOS["resumos"][self.curso].get(self.values[0], "Conteúdo não encontrado.")
         await interaction.response.edit_message(embed=discord.Embed(title=f"📖 {self.values[0]}", description=texto, color=0x3498db))
 
+# ==========================================
+# 🖥️ COMPONENTES CORRIGIDOS (4 DISCIPLINAS)
+# ==========================================
+
 class PainelCursos(discord.ui.View):
     def __init__(self): super().__init__(timeout=None)
     
-    @discord.ui.button(label="Matemática", style=discord.ButtonStyle.primary, emoji="🔢")
+    @discord.ui.button(label="Matemática Aplicada", style=discord.ButtonStyle.primary, emoji="🔢")
     async def btn_ma(self, i: discord.Interaction, b: discord.ui.Button):
-        await i.response.send_message("Módulos de Matemática:", view=discord.ui.View().add_item(DropdownResumos("MA")), ephemeral=True)
+        await i.response.send_message("Módulos de Matemática Aplicada:", view=discord.ui.View().add_item(DropdownResumos("MA")), ephemeral=True)
 
-    @discord.ui.button(label="Gestão", style=discord.ButtonStyle.success, emoji="👥")
+    @discord.ui.button(label="Gestão de Times", style=discord.ButtonStyle.success, emoji="👥")
     async def btn_gt(self, i: discord.Interaction, b: discord.ui.Button):
-        await i.response.send_message("Módulos de Gestão:", view=discord.ui.View().add_item(DropdownResumos("GT")), ephemeral=True)
+        await i.response.send_message("Módulos de Gestão de Times:", view=discord.ui.View().add_item(DropdownResumos("GT")), ephemeral=True)
 
-    @discord.ui.button(label="Programação (POO)", style=discord.ButtonStyle.secondary, emoji="💻")
-    async def btn_poo(self, i: discord.Interaction, b: discord.ui.Button):
-        await i.response.send_message("Módulos de POO:", view=discord.ui.View().add_item(DropdownResumos("POO")), ephemeral=True)
+    @discord.ui.button(label="Lógica Matemática", style=discord.ButtonStyle.secondary, emoji="⚖️")
+    async def btn_ml(self, i: discord.Interaction, b: discord.ui.Button):
+        await i.response.send_message("Módulos de Lógica Matemática:", view=discord.ui.View().add_item(DropdownResumos("Matematica_Logica")), ephemeral=True)
+
+    @discord.ui.button(label="Lógica de Programação", style=discord.ButtonStyle.danger, emoji="💻")
+    async def btn_lp(self, i: discord.Interaction, b: discord.ui.Button):
+        await i.response.send_message("Módulos de Lógica de Programação:", view=discord.ui.View().add_item(DropdownResumos("Programacao")), ephemeral=True)
 
 class ViewSimulado(discord.ui.View):
     def __init__(self, user_id, questoes, materia):
@@ -83,12 +108,13 @@ class ViewSimulado(discord.ui.View):
         if self.atual >= self.total:
             xp = self.pontos * 20
             adicionar_xp(self.user_id, xp)
-            embed = discord.Embed(title="📊 Simulado Finalizado", description=f"**{self.materia}**\n✅ Acertos: {self.pontos}/{self.total}\n⭐ XP Ganho: +{xp}", color=0x2ecc71)
-            await interaction.response.edit_message(content="✅ Processando resultado...", embed=None, view=None)
+            embed = discord.Embed(title="📊 Simulado Finalizado", description=f"✅ Acertos: {self.pontos}/{self.total}\n⭐ XP: +{xp}", color=0x2ecc71)
+            await interaction.response.edit_message(content="🏁 Prova encerrada! O canal fechará em 15s.", embed=None, view=None)
             await interaction.channel.send(embed=embed)
             await asyncio.sleep(15); await interaction.channel.delete(); return
 
         q = self.questoes[self.atual]
+        registrar_questao(self.user_id, self.materia, q['q'])
         embed = discord.Embed(title=f"Questão {self.atual+1}/{self.total}", description=f"**{q['q']}**", color=0xe67e22)
         self.clear_items()
         for idx, opt in enumerate(q['opts']):
@@ -98,25 +124,35 @@ class ViewSimulado(discord.ui.View):
                 if int(b.custom_id) == self.questoes[self.atual]['ans']: self.pontos += 1
                 self.atual += 1; await self.atualizar(inter)
             btn.callback = cb; self.add_item(btn)
-        await interaction.response.edit_message(embed=embed, view=self)
+        if interaction.response.is_done(): await interaction.edit_original_response(embed=embed, view=self)
+        else: await interaction.response.edit_message(embed=embed, view=self)
 
 class ViewEscolhaSimulado(discord.ui.View):
-    def __init__(self, user_id): super().__init__(timeout=None); self.user_id = user_id
+    def __init__(self, user_id): 
+        super().__init__(timeout=None)
+        self.user_id = user_id
     
     @discord.ui.select(placeholder="Escolha a matéria para a prova...", options=[
         discord.SelectOption(label="Matemática Aplicada", value="MA", emoji="🔢"),
         discord.SelectOption(label="Gestão de Times", value="GT", emoji="👥"),
-        discord.SelectOption(label="Programação OO", value="POO", emoji="💻")
+        discord.SelectOption(label="Lógica Matemática", value="Matematica_Logica", emoji="⚖️"),
+        discord.SelectOption(label="Lógica de Programação", value="Programacao", emoji="💻")
     ])
     async def select_materia(self, interaction: discord.Interaction, select: discord.ui.Select):
-        materia = select.values[0]
-        questoes = DADOS["questoes"].get(materia, [])
-        if not questoes: return await interaction.response.send_message("Sem questões para esta matéria.", ephemeral=True)
-        random.shuffle(questoes)
-        view = ViewSimulado(interaction.user.id, questoes[:5], materia)
-        await interaction.response.edit_message(content="📝 Boa sorte na prova!", embed=None, view=None)
+        materia_id = select.values[0]
+        todas = DADOS["questoes"].get(materia_id, [])
+        resolvidas = pegar_resolvidas(self.user_id, materia_id)
+        
+        # Filtra apenas as inéditas
+        disponiveis = [q for q in todas if q['q'] not in resolvidas]
+        
+        if not disponiveis:
+            return await interaction.response.send_message("❌ Você já resolveu todas as questões desta matéria!", ephemeral=True)
+        
+        random.shuffle(disponiveis)
+        view = ViewSimulado(self.user_id, disponiveis[:5], materia_id)
+        await interaction.response.edit_message(content=f"📝 Iniciando Simulado de {materia_id}...", view=None)
         await view.atualizar(interaction)
-
 class ViewPainelSimulado(discord.ui.View):
     def __init__(self): super().__init__(timeout=None)
     @discord.ui.button(label="Iniciar Novo Simulado", style=discord.ButtonStyle.primary, emoji="📝", custom_id="persistent:iniciar")
@@ -179,12 +215,14 @@ async def helpaluno(interaction: discord.Interaction):
     embed.add_field(name="/ranking", value="Vê os melhores da turma.", inline=False)
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
-@bot.tree.command(name="helpprof", description="Comandos administrativos para professores.")
+@bot.tree.command(name="helpprof", description="Detalhes de todas as funções para os alunos.")
 async def helpprof(interaction: discord.Interaction):
-    embed = discord.Embed(title="🛡️ Painel do Professor", color=0xe74c3c)
-    embed.add_field(name="/setup_simulado", value="Cria o botão de início de prova.", inline=False)
-    embed.add_field(name="/backup", value="Baixa o banco de dados dos alunos.", inline=False)
-    await interaction.response.send_message(embed=embed, ephemeral=True)
+    embed = discord.Embed(title="📚 Manual do Estudante", description="Como usar o bot:", color=0x3498db)
+    embed.add_field(name="/hub", value="Lê resumos e conteúdos.", inline=False)
+    embed.add_field(name="/status", value="Vê seu nível e XP.", inline=False)
+    embed.add_field(name="/ranking", value="Top 5 melhores alunos.", inline=False)
+    embed.add_field(name="/duvida", value="Posta uma pergunta para a turma responder.", inline=False)
+    await interaction.response.send_message(embed=embed)
 
 @bot.tree.command(name="status", description="Mostra seu nível e progresso acadêmico.")
 async def status(interaction: discord.Interaction):
@@ -216,6 +254,23 @@ async def tabela_verdade(interaction: discord.Interaction):
 async def backup(interaction: discord.Interaction):
     try: await interaction.response.send_message(file=discord.File(DB_PATH), ephemeral=True)
     except: await interaction.response.send_message("❌ Erro no backup.", ephemeral=True)
+
+@bot.tree.command(name="helpdiretor", description="[ADM] Manual secreto apenas para o Diretor.")
+@app_commands.checks.has_permissions(administrator=True)
+async def helpdiretor(interaction: discord.Interaction):
+    embed = discord.Embed(title="🛡️ Painel do Diretor", color=0xe74c3c)
+    embed.add_field(name="/setup_simulado", value="Cria o painel fixo de provas.", inline=False)
+    embed.add_field(name="/backup", value="Baixa o banco de dados.", inline=False)
+    await interaction.response.send_message(embed=embed, ephemeral=True)
+
+@bot.tree.command(name="helpprof", description="Detalhes de todas as funções para os alunos.")
+async def helpprof(interaction: discord.Interaction):
+    embed = discord.Embed(title="📚 Manual do Estudante", description="Como usar o bot:", color=0x3498db)
+    embed.add_field(name="/hub", value="Lê resumos e conteúdos.", inline=False)
+    embed.add_field(name="/status", value="Vê seu nível e XP.", inline=False)
+    embed.add_field(name="/ranking", value="Top 5 melhores alunos.", inline=False)
+    embed.add_field(name="/duvida", value="Posta uma pergunta para a turma responder.", inline=False)
+    await interaction.response.send_message(embed=embed)
 
 async def main():
     print("⏳ Iniciando bot em 15s...")
