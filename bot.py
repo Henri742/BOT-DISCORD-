@@ -237,9 +237,13 @@ async def ranking(interaction: discord.Interaction):
 @bot.tree.command(name="tabela_verdade", description="Treine lógica resolvendo tabelas verdade.")
 async def tabela_verdade(interaction: discord.Interaction):
     d = random.choice([
-        {"t": "Conjunção (E)", "e": "p ^ q", "r": ["V", "F", "F", "F"]},
-        {"t": "Disjunção (OU)", "e": "p v q", "r": ["V", "V", "V", "F"]},
-        {"t": "Condicional (SE... ENTÃO)", "e": "p -> q", "r": ["V", "F", "V", "V"]}
+        {"t": "Conjunção (E)", "e": "p ∧ q", "r": ["V", "F", "F", "F"]},
+        {"t": "Disjunção (OU)", "e": "p ∨ q", "r": ["V", "V", "V", "F"]},
+        {"t": "Condicional (SE... ENTÃO)", "e": "p → q", "r": ["V", "F", "V", "V"]},
+        {"t": "Bicondicional (SE E SOMENTE SE)", "e": "p ↔ q", "r": ["V", "F", "F", "V"]},
+        {"t": "Disjunção Exclusiva (OU... OU)", "e": "p ⊕ q", "r": ["F", "V", "V", "F"]},
+        {"t": "Negação da Conjunção (NAND)", "e": "¬(p ∧ q)", "r": ["F", "V", "V", "V"]},
+        {"t": "Negação da Disjunção (NOR)", "e": "¬(p ∨ q)", "r": ["F", "F", "F", "V"]}
     ])
     await interaction.response.send_modal(ModalTabelaVerdade(d["t"], d["e"], d["r"]))
 
@@ -257,6 +261,23 @@ async def helpdiretor(interaction: discord.Interaction):
     embed.add_field(name="/backup", value="Baixa o banco de dados.", inline=False)
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
+@bot.tree.command(name="resetar_meu_progresso", description="[ADM] Reseta as questões resolvidas para você poder testar novamente.")
+@app_commands.checks.has_permissions(administrator=True)
+async def resetar_meu_progresso(interaction: discord.Interaction):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('DELETE FROM questoes_resolvidas WHERE user_id = ?', (str(interaction.user.id),))
+    conn.commit()
+    conn.close()
+    await interaction.response.send_message("✅ Seu histórico de questões foi limpo! Pode iniciar um novo simulado.", ephemeral=True)
+
+@bot.tree.command(name="duvida", description="Publique uma dúvida para a turma ajudar!")
+async def duvida(interaction: discord.Interaction, pergunta: str):
+    embed = discord.Embed(title="🚨 Dúvida de Aluno!", description=f"**Pergunta:**\n{pergunta}", color=0xf1c40f)
+    # Foto do aluno que perguntou
+    embed.set_author(name=interaction.user.display_name, icon_url=interaction.user.display_avatar.url if interaction.user.display_avatar else None)
+    
+    await interaction.response.send_message(content="@here Temos um colega com dúvida!", embed=embed)
 
 async def main():
     print("⏳ Iniciando bot em 15s...")
