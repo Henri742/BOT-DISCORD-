@@ -382,4 +382,16 @@ async def backup(interaction: discord.Interaction):
     except Exception as e:
         await interaction.response.send_message(f"❌ Erro ao gerar backup: {e}", ephemeral=True)
 
-bot.run(os.getenv("DISCORD_TOKEN"))
+async def iniciar_sistema():
+    # Dá 5 segundos para o sistema de arquivos e rede do Railway estabilizarem
+    await asyncio.sleep(5) 
+    try:
+        await bot.start(os.getenv("DISCORD_TOKEN"))
+    except Exception as e:
+        print(f"❌ Erro fatal na conexão: {e}")
+
+if __name__ == "__main__":
+    try:
+        asyncio.run(iniciar_sistema())
+    except KeyboardInterrupt:
+        pass
