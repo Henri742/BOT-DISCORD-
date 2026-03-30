@@ -137,38 +137,6 @@ class ViewSimulado(discord.ui.View):
         if interaction.response.is_done(): await interaction.edit_original_response(embed=embed, view=self)
         else: await interaction.response.edit_message(embed=embed, view=self)
 
-class ViewEscolhaSimulado(discord.ui.View):
-    def __init__(self, user_id): 
-        super().__init__(timeout=None)
-        self.user_id = user_id
-    
-    @discord.ui.select(placeholder="Escolha a matéria para a prova...", options=[
-        discord.SelectOption(label="Matemática Aplicada", value="Matematica_Aplicada", emoji="🔢"),
-        discord.SelectOption(label="Gestão de Times", value="Gestao_Times", emoji="👥"),
-        discord.SelectOption(label="Lógica Matemática", value="Matematica_Logica", emoji="⚖️"),
-        discord.SelectOption(label="Lógica de Programação", value="Programacao", emoji="💻")
-    ])
-    async def select_materia(self, interaction: discord.Interaction, select: discord.ui.Select):
-        materia_id = select.values[0]
-        todas = DADOS["questoes"].get(materia_id, [])
-        
-        # LOG PARA TESTE (Aparecerá no Railway)
-        print(f"DEBUG: Matéria selecionada: {materia_id} | Total no JSON: {len(todas)}")
-        
-        resolvidas = pegar_resolvidas(self.user_id, materia_id)
-        disponiveis = [q for q in todas if q['q'] not in resolvidas]
-        
-        if not disponiveis:
-            # Se não há disponíveis, mas existem questões no JSON, o problema é o banco
-            if todas:
-                return await interaction.response.send_message(f"❌ Você já acertou as {len(todas)} questões de {materia_id} que existem no sistema!", ephemeral=True)
-            else:
-                return await interaction.response.send_message(f"⚠️ O arquivo conteudo.json está vazio para a chave: {materia_id}", ephemeral=True)
-        
-        random.shuffle(disponiveis)
-        view = ViewSimulado(self.user_id, disponiveis[:5], materia_id)
-        await interaction.response.edit_message(content=f"📝 Iniciando Simulado de {materia_id}...", view=None)
-        await view.atualizar(interaction)
 
 class ViewEscolhaSimulado(discord.ui.View):
     def __init__(self, user_id): 
@@ -235,6 +203,22 @@ class ModalTabelaVerdade(discord.ui.Modal):
 # ==========================================
 # 🚀 CORE DO BOT
 # ==========================================
+class ViewPainelSimulado(discord.ui.View):
+    def __init__(self): 
+        super().__init__(timeout=None)
+        
+    @discord.ui.button(label="Iniciar Novo Simulado", style=discord.ButtonStyle.primary, emoji="📝", custom_id="persistent:iniciar")
+    async def iniciar_sala(self, interaction: discord.Interaction, button: discord.ui.Button):
+        overwrites = {
+            interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False),
+            interaction.user: discord.PermissionOverwrite(read_messages=True, send_messages=True),
+            interaction.guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True)
+        }
+        canal = await interaction.guild.create_text_channel(f"prova-{interaction.user.name}".lower(), overwrites=overwrites)
+        await interaction.response.send_message(f"✅ Sala privada criada: {canal.mention}", ephemeral=True)
+        # Chama a View correta com os dois seletores
+        await canal.send(embed=discord.Embed(title="📚 Preparado?", description="Escolha a matéria e a quantidade:", color=0x8e44ad), view=ViewEscolhaSimulado(interaction.user.id))
+
 
 class GustavoLMS(commands.Bot):
     def __init__(self):
