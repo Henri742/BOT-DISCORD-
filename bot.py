@@ -92,7 +92,6 @@ class PainelCursos(discord.ui.View):
     @discord.ui.button(label="Lógica de Programação", style=discord.ButtonStyle.danger, emoji="💻")
     async def btn_lp(self, i: discord.Interaction, b: discord.ui.Button):
         await i.response.send_message("Módulos de Lógica de Programação:", view=discord.ui.View().add_item(DropdownResumos("Programacao")), ephemeral=True)
-
 class ViewSimulado(discord.ui.View):
     def __init__(self, user_id, questoes, materia):
         super().__init__(timeout=600)
