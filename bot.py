@@ -12,26 +12,20 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ==========================================
-# 🗄️ CONFIGURAÇÃO DE BANCO (VOLUME /DATA)
+# 🗄️ BANCO DE DADOS (USANDO VOLUME /data)
 # ==========================================
-# Usamos o caminho absoluto que você configurou no painel
 DB_PATH = '/data/alunos.db'
 
 def iniciar_banco():
-    # Tenta criar o diretório se ele não existir (segurança extra)
     if not os.path.exists('/data'):
-        try:
-            os.makedirs('/data')
-        except:
-            pass 
-
+        try: os.makedirs('/data')
+        except: pass
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS alunos (user_id TEXT PRIMARY KEY, xp INTEGER)''')
     c.execute('''CREATE TABLE IF NOT EXISTS questoes_resolvidas (user_id TEXT, materia TEXT, questao TEXT, UNIQUE(user_id, materia, questao))''')
     conn.commit()
     conn.close()
-    print(f"✅ Banco de dados carregado em: {DB_PATH}")
 
 def adicionar_xp(user_id, pontos):
     conn = sqlite3.connect(DB_PATH); c = conn.cursor()
@@ -60,7 +54,7 @@ def resetar_resolvidas(user_id, materia):
     conn.commit(); conn.close()
 
 # ==========================================
-# 🖥️ COMPONENTES VISUAIS (HUB E SIMULADO)
+# 🖥️ COMPONENTES VISUAIS
 # ==========================================
 
 try:
@@ -73,7 +67,7 @@ class DropdownResumos(discord.ui.Select):
     def __init__(self, curso):
         self.curso = curso
         opcoes = [discord.SelectOption(label=k) for k in DADOS["resumos"].get(curso, {}).keys()] or [discord.SelectOption(label="Vazio")]
-        super().__init__(placeholder="Selecione a aula para ler o resumo...", options=opcoes)
+        super().__init__(placeholder="Selecione a aula...", options=opcoes)
     async def callback(self, interaction: discord.Interaction):
         texto = DADOS["resumos"][self.curso].get(self.values[0], "Conteúdo não encontrado.")
         await interaction.response.edit_message(embed=discord.Embed(title=f"📖 {self.values[0]}", description=texto, color=0x3498db))
@@ -98,8 +92,8 @@ class ViewSimulado(discord.ui.View):
             embed = discord.Embed(title="📊 Resultado", description=f"Matéria: {self.materia}\nAcertos: {self.pontos}/{self.total}\nXP: +{xp}", color=0x2ecc71)
             try: await interaction.user.send(embed=embed)
             except: pass
-            await interaction.response.edit_message(content="✅ Simulado concluído!", embed=None, view=None)
-            return
+            await interaction.response.edit_message(content="✅ Simulado concluído! O canal fechará em 10s.", embed=None, view=None)
+            await asyncio.sleep(10); await interaction.channel.delete(); return
         q = self.questoes[self.atual]; registrar_questao(self.user_id, self.materia, q['q'])
         embed = discord.Embed(title=f"Questão {self.atual+1}/{self.total}", description=f"**{q['q']}**", color=0xe67e22)
         self.clear_items()
@@ -117,14 +111,26 @@ class ViewPainelSimulado(discord.ui.View):
     def __init__(self): super().__init__(timeout=None)
     @discord.ui.button(label="Iniciar Novo Simulado", style=discord.ButtonStyle.primary, emoji="📝", custom_id="persistent:iniciar")
     async def iniciar_sala(self, interaction: discord.Interaction, button: discord.ui.Button):
-        guild, user = interaction.guild, interaction.user
-        overwrites = {guild.default_role: discord.PermissionOverwrite(read_messages=False), user: discord.PermissionOverwrite(read_messages=True, send_messages=True), guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True)}
-        canal = await guild.create_text_channel(f"prova-{user.name}".lower(), overwrites=overwrites)
+        overwrites = {interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False), interaction.user: discord.PermissionOverwrite(read_messages=True, send_messages=True), interaction.guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True)}
+        canal = await interaction.guild.create_text_channel(f"prova-{interaction.user.name}".lower(), overwrites=overwrites)
         await interaction.response.send_message(f"✅ Sala criada: {canal.mention}", ephemeral=True)
         await canal.send(embed=discord.Embed(title="🎒 Sala de Prova", description="Escolha a disciplina:", color=0x8e44ad), view=PainelCursos())
 
+class ModalTabelaVerdade(discord.ui.Modal):
+    l1 = discord.ui.TextInput(label='1. p=V, q=V', max_length=1)
+    l2 = discord.ui.TextInput(label='2. p=V, q=F', max_length=1)
+    l3 = discord.ui.TextInput(label='3. p=F, q=V', max_length=1)
+    l4 = discord.ui.TextInput(label='4. p=F, q=F', max_length=1)
+    def __init__(self, t, e, r): super().__init__(title=t[:45]); self.exp, self.resp = e, r
+    async def on_submit(self, interaction: discord.Interaction):
+        u = [self.l1.value.upper(), self.l2.value.upper(), self.l3.value.upper(), self.l4.value.upper()]
+        if u == self.resp:
+            adicionar_xp(interaction.user.id, 30)
+            await interaction.response.send_message(f"✅ Correto! +30 XP")
+        else: await interaction.response.send_message(f"❌ Errou! Gabarito: {', '.join(self.resp)}", ephemeral=True)
+
 # ==========================================
-# 🚀 CORE DO SISTEMA
+# 🚀 CORE DO BOT
 # ==========================================
 
 class GustavoLMS(commands.Bot):
@@ -145,13 +151,36 @@ async def setup_simulado(interaction: discord.Interaction):
     await interaction.response.send_message("Painel configurado!", ephemeral=True)
     await interaction.channel.send(embed=discord.Embed(title="📝 Central de Simulados", description="Clique abaixo para abrir uma sala privada.", color=0x3498db), view=ViewPainelSimulado())
 
+@bot.tree.command(name="hub")
+async def hub(interaction: discord.Interaction):
+    await interaction.response.send_message(embed=discord.Embed(title="🏛️ Campus Virtual", description="Selecione a disciplina:", color=0x8e44ad), view=PainelCursos(), ephemeral=True)
+
+@bot.tree.command(name="status")
+async def status(interaction: discord.Interaction):
+    xp = pegar_xp(interaction.user.id)
+    embed = discord.Embed(title="📊 Status Académico", color=0x2c3e50)
+    embed.add_field(name="Nível", value=f"✨ Lvl {xp//100}", inline=True)
+    embed.add_field(name="XP Total", value=f"⭐ {xp} XP", inline=True)
+    await interaction.response.send_message(embed=embed)
+
 @bot.tree.command(name="ranking")
 async def ranking(interaction: discord.Interaction):
     conn = sqlite3.connect(DB_PATH); c = conn.cursor()
     c.execute('SELECT user_id, xp FROM alunos ORDER BY xp DESC LIMIT 5'); top = c.fetchall(); conn.close()
     embed = discord.Embed(title="🏆 Top 5 Alunos", color=0xf1c40f)
-    for i, (u, x) in enumerate(top): embed.add_field(name=f"{i+1}º Lugar", value=f"<@{u}>: {x} XP", inline=False)
+    for i, (u, x) in enumerate(top): embed.add_field(name=f"{i+1}º", value=f"<@{u}>: {x} XP", inline=False)
     await interaction.response.send_message(embed=embed)
+
+@bot.tree.command(name="calcular")
+async def calcular(interaction: discord.Interaction, n1: float, op: str, n2: float):
+    try: res = eval(f"{n1}{op}{n2}")
+    except: res = "Erro"
+    await interaction.response.send_message(f"🔢 Resultado: `{res}`")
+
+@bot.tree.command(name="tabela_verdade")
+async def tabela_verdade(interaction: discord.Interaction):
+    d = random.choice([{"t": "Conjunção (E)", "e": "p ^ q", "r": ["V", "F", "F", "F"]}, {"t": "Disjunção (OU)", "e": "p v q", "r": ["V", "V", "V", "F"]}])
+    await interaction.response.send_modal(ModalTabelaVerdade(d["t"], d["e"], d["r"]))
 
 @bot.tree.command(name="backup")
 @app_commands.checks.has_permissions(administrator=True)
@@ -159,15 +188,9 @@ async def backup(interaction: discord.Interaction):
     try: await interaction.response.send_message(file=discord.File(DB_PATH), ephemeral=True)
     except: await interaction.response.send_message("❌ Erro no backup.", ephemeral=True)
 
-# ==========================================
-# 🔄 INÍCIO SEGURO (ANTI-CRASH)
-# ==========================================
 async def main():
-    # Dá 15 segundos para o Railway montar o volume e estabilizar rede
-    print("⏳ Aguardando estabilização (15s)...")
     await asyncio.sleep(15)
-    async with bot:
-        await bot.start(os.getenv("DISCORD_TOKEN"))
+    async with bot: await bot.start(os.getenv("DISCORD_TOKEN"))
 
 if __name__ == "__main__":
     asyncio.run(main())
