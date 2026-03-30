@@ -127,21 +127,27 @@ class ViewEscolhaSimulado(discord.ui.View):
         self.user_id = user_id
     
     @discord.ui.select(placeholder="Escolha a matéria para a prova...", options=[
-        discord.SelectOption(label="Matemática Aplicada", value="MA", emoji="🔢"),
-        discord.SelectOption(label="Gestão de Times", value="GT", emoji="👥"),
+        discord.SelectOption(label="Matemática Aplicada", value="Matematica_Aplicada", emoji="🔢"),
+        discord.SelectOption(label="Gestão de Times", vvalue="Gestao_Times", emoji="👥"),
         discord.SelectOption(label="Lógica Matemática", value="Matematica_Logica", emoji="⚖️"),
         discord.SelectOption(label="Lógica de Programação", value="Programacao", emoji="💻")
     ])
     async def select_materia(self, interaction: discord.Interaction, select: discord.ui.Select):
         materia_id = select.values[0]
         todas = DADOS["questoes"].get(materia_id, [])
-        resolvidas = pegar_resolvidas(self.user_id, materia_id)
         
-        # Filtra apenas as inéditas
+        # LOG PARA TESTE (Aparecerá no Railway)
+        print(f"DEBUG: Matéria selecionada: {materia_id} | Total no JSON: {len(todas)}")
+        
+        resolvidas = pegar_resolvidas(self.user_id, materia_id)
         disponiveis = [q for q in todas if q['q'] not in resolvidas]
         
         if not disponiveis:
-            return await interaction.response.send_message("❌ Você já resolveu todas as questões desta matéria!", ephemeral=True)
+            # Se não há disponíveis, mas existem questões no JSON, o problema é o banco
+            if todas:
+                return await interaction.response.send_message(f"❌ Você já acertou as {len(todas)} questões de {materia_id} que existem no sistema!", ephemeral=True)
+            else:
+                return await interaction.response.send_message(f"⚠️ O arquivo conteudo.json está vazio para a chave: {materia_id}", ephemeral=True)
         
         random.shuffle(disponiveis)
         view = ViewSimulado(self.user_id, disponiveis[:5], materia_id)
@@ -261,15 +267,16 @@ async def helpdiretor(interaction: discord.Interaction):
     embed.add_field(name="/backup", value="Baixa o banco de dados.", inline=False)
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
-@bot.tree.command(name="resetar_meu_progresso", description="[ADM] Reseta as questões resolvidas para você poder testar novamente.")
+@bot.tree.command(name="resetar_meu_progresso", description="[ADM] Reseta TODO o seu histórico de questões.")
 @app_commands.checks.has_permissions(administrator=True)
 async def resetar_meu_progresso(interaction: discord.Interaction):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
+    # Deleta TUDO o que estiver ligado ao seu ID, sem filtrar matéria
     c.execute('DELETE FROM questoes_resolvidas WHERE user_id = ?', (str(interaction.user.id),))
     conn.commit()
     conn.close()
-    await interaction.response.send_message("✅ Seu histórico de questões foi limpo! Pode iniciar um novo simulado.", ephemeral=True)
+    await interaction.response.send_message("✅ Seu histórico foi totalmente resetado! Agora o bot vai ler as questões do JSON do zero.", ephemeral=True)
 
 @bot.tree.command(name="duvida", description="Publique uma dúvida para a turma ajudar!")
 async def duvida(interaction: discord.Interaction, pergunta: str):
