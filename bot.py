@@ -257,14 +257,6 @@ async def helpdiretor(interaction: discord.Interaction):
     embed.add_field(name="/backup", value="Baixa o banco de dados.", inline=False)
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
-@bot.tree.command(name="helpprof", description="Detalhes de todas as funções para os alunos.")
-async def helpprof(interaction: discord.Interaction):
-    embed = discord.Embed(title="📚 Manual do Estudante", description="Como usar o bot:", color=0x3498db)
-    embed.add_field(name="/hub", value="Lê resumos e conteúdos.", inline=False)
-    embed.add_field(name="/status", value="Vê seu nível e XP.", inline=False)
-    embed.add_field(name="/ranking", value="Top 5 melhores alunos.", inline=False)
-    embed.add_field(name="/duvida", value="Posta uma pergunta para a turma responder.", inline=False)
-    await interaction.response.send_message(embed=embed)
 
 async def main():
     print("⏳ Iniciando bot em 15s...")
