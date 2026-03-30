@@ -12,26 +12,27 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ==========================================
-# 🗄️ CONFIGURAÇÃO DE BANCO E VOLUMES
+# 🗄️ CONFIGURAÇÃO DE BANCO (VOLUME /DATA)
 # ==========================================
+# Usamos o caminho absoluto que você configurou no painel
 DB_PATH = '/data/alunos.db'
 
 def iniciar_banco():
-    # Verifica se o volume /data existe (essencial para o Railway)
+    # Tenta criar o diretório se ele não existir (segurança extra)
     if not os.path.exists('/data'):
         try:
             os.makedirs('/data')
         except:
-            pass # Em produção o Railway já monta o volume
-            
+            pass 
+
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS alunos (user_id TEXT PRIMARY KEY, xp INTEGER)''')
     c.execute('''CREATE TABLE IF NOT EXISTS questoes_resolvidas (user_id TEXT, materia TEXT, questao TEXT, UNIQUE(user_id, materia, questao))''')
     conn.commit()
     conn.close()
+    print(f"✅ Banco de dados carregado em: {DB_PATH}")
 
-# Funções de Banco de Dados (Caminho Fixo no Volume)
 def adicionar_xp(user_id, pontos):
     conn = sqlite3.connect(DB_PATH); c = conn.cursor()
     c.execute('INSERT INTO alunos (user_id, xp) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET xp = xp + ?', (str(user_id), pontos, pontos))
@@ -59,7 +60,7 @@ def resetar_resolvidas(user_id, materia):
     conn.commit(); conn.close()
 
 # ==========================================
-# 🖥️ COMPONENTES VISUAIS
+# 🖥️ COMPONENTES VISUAIS (HUB E SIMULADO)
 # ==========================================
 
 try:
@@ -72,7 +73,7 @@ class DropdownResumos(discord.ui.Select):
     def __init__(self, curso):
         self.curso = curso
         opcoes = [discord.SelectOption(label=k) for k in DADOS["resumos"].get(curso, {}).keys()] or [discord.SelectOption(label="Vazio")]
-        super().__init__(placeholder="Selecione a aula...", options=opcoes)
+        super().__init__(placeholder="Selecione a aula para ler o resumo...", options=opcoes)
     async def callback(self, interaction: discord.Interaction):
         texto = DADOS["resumos"][self.curso].get(self.values[0], "Conteúdo não encontrado.")
         await interaction.response.edit_message(embed=discord.Embed(title=f"📖 {self.values[0]}", description=texto, color=0x3498db))
@@ -97,8 +98,8 @@ class ViewSimulado(discord.ui.View):
             embed = discord.Embed(title="📊 Resultado", description=f"Matéria: {self.materia}\nAcertos: {self.pontos}/{self.total}\nXP: +{xp}", color=0x2ecc71)
             try: await interaction.user.send(embed=embed)
             except: pass
-            await interaction.response.edit_message(content="✅ Simulado concluído! Canal deletado em 10s.", embed=None, view=None)
-            await asyncio.sleep(10); await interaction.channel.delete(); return
+            await interaction.response.edit_message(content="✅ Simulado concluído!", embed=None, view=None)
+            return
         q = self.questoes[self.atual]; registrar_questao(self.user_id, self.materia, q['q'])
         embed = discord.Embed(title=f"Questão {self.atual+1}/{self.total}", description=f"**{q['q']}**", color=0xe67e22)
         self.clear_items()
@@ -149,7 +150,7 @@ async def ranking(interaction: discord.Interaction):
     conn = sqlite3.connect(DB_PATH); c = conn.cursor()
     c.execute('SELECT user_id, xp FROM alunos ORDER BY xp DESC LIMIT 5'); top = c.fetchall(); conn.close()
     embed = discord.Embed(title="🏆 Top 5 Alunos", color=0xf1c40f)
-    for i, (u, x) in enumerate(top): embed.add_field(name=f"{i+1}º", value=f"<@{u}>: {x} XP", inline=False)
+    for i, (u, x) in enumerate(top): embed.add_field(name=f"{i+1}º Lugar", value=f"<@{u}>: {x} XP", inline=False)
     await interaction.response.send_message(embed=embed)
 
 @bot.tree.command(name="backup")
@@ -159,17 +160,14 @@ async def backup(interaction: discord.Interaction):
     except: await interaction.response.send_message("❌ Erro no backup.", ephemeral=True)
 
 # ==========================================
-# 🔄 SISTEMA ANTI-CRASH (CONEXÃO SEGURA)
+# 🔄 INÍCIO SEGURO (ANTI-CRASH)
 # ==========================================
 async def main():
-    # Delay de 10 segundos para o Railway montar volumes e estabilizar rede DNS
-    print("⏳ Aguardando estabilização do sistema (10s)...")
-    await asyncio.sleep(10)
+    # Dá 15 segundos para o Railway montar o volume e estabilizar rede
+    print("⏳ Aguardando estabilização (15s)...")
+    await asyncio.sleep(15)
     async with bot:
         await bot.start(os.getenv("DISCORD_TOKEN"))
 
 if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        pass
+    asyncio.run(main())
