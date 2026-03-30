@@ -128,7 +128,7 @@ class ViewEscolhaSimulado(discord.ui.View):
     
     @discord.ui.select(placeholder="Escolha a matéria para a prova...", options=[
         discord.SelectOption(label="Matemática Aplicada", value="Matematica_Aplicada", emoji="🔢"),
-        discord.SelectOption(label="Gestão de Times", vvalue="Gestao_Times", emoji="👥"),
+        discord.SelectOption(label="Gestão de Times", value="Gestao_Times", emoji="👥"),
         discord.SelectOption(label="Lógica Matemática", value="Matematica_Logica", emoji="⚖️"),
         discord.SelectOption(label="Lógica de Programação", value="Programacao", emoji="💻")
     ])
