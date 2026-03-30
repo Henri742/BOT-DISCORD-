@@ -97,46 +97,75 @@ class ViewSimulado(discord.ui.View):
         super().__init__(timeout=600)
         self.user_id, self.questoes, self.materia = user_id, questoes, materia
         self.total, self.atual, self.pontos = len(questoes), 0, 0
+        self.relatorio = [] # 📝 Lista para guardar o gabarito
 
     async def atualizar(self, interaction: discord.Interaction):
         if self.atual >= self.total:
             xp_ganho = self.pontos * 20
             adicionar_xp(self.user_id, xp_ganho)
             
-            embed_fim = discord.Embed(title="📊 Simulado Finalizado", color=0x2ecc71)
-            embed_fim.add_field(name="Matéria", value=self.materia, inline=False)
-            embed_fim.add_field(name="Acertos", value=f"{self.pontos}/{self.total}", inline=True)
-            embed_fim.add_field(name="XP Ganho", value=f"+{xp_ganho} ⭐", inline=True)
+            # --- MONTAGEM DO GABARITO DETALHADO ---
+            texto_gabarito = f"📑 **GABARITO DETALHADO - {self.materia}**\n\n"
+            for item in self.relatorio:
+                status = "✅" if item['correto'] else "❌"
+                texto_gabarito += (
+                    f"{status} **Q: {item['pergunta']}**\n"
+                    f"   └ Marcou: `{item['marcada']}`\n"
+                    f"   └ Correta: `{item['gabarito']}`\n\n"
+                )
             
+            embed_fim = discord.Embed(title="📊 Simulado Finalizado", color=0x2ecc71)
+            embed_fim.add_field(name="Acertos", value=f"{self.pontos}/{self.total}", inline=True)
+            embed_fim.add_field(name="XP", value=f"+{xp_ganho} ⭐", inline=True)
+
             # 📩 ENVIO PARA O PRIVADO (DM)
             try:
                 user = await interaction.client.fetch_user(self.user_id)
-                await user.send(content="Aqui está a cópia do seu resultado:", embed=embed_fim)
-                msg_dm = "\n✅ Uma cópia foi enviada para o seu privado!"
+                # Enviamos o resumo em Embed e o texto detalhado (se for muito longo, enviamos em partes)
+                await user.send(embed=embed_fim)
+                if len(texto_gabarito) > 2000:
+                    for i in range(0, len(texto_gabarito), 2000):
+                        await user.send(texto_gabarito[i:i+2000])
+                else:
+                    await user.send(texto_gabarito)
+                msg_dm = "\n✅ Gabarito detalhado enviado no seu privado!"
             except:
-                msg_dm = "\n⚠️ Não consegui enviar para seu privado (verifique se as DMs estão abertas)."
+                msg_dm = "\n⚠️ Não consegui enviar o gabarito (DMs fechadas)."
 
-            await interaction.response.edit_message(content=f"🏁 Prova encerrada! {msg_dm}\nO canal será deletado em 15s.", embed=None, view=None)
+            await interaction.response.edit_message(content=f"🏁 Prova encerrada! {msg_dm}", embed=None, view=None)
             await interaction.channel.send(embed=embed_fim)
-            
-            await asyncio.sleep(15)
-            await interaction.channel.delete()
-            return
+            await asyncio.sleep(15); await interaction.channel.delete(); return
 
         q = self.questoes[self.atual]
         registrar_questao(self.user_id, self.materia, q['q'])
         embed = discord.Embed(title=f"Questão {self.atual+1}/{self.total}", description=f"**{q['q']}**", color=0xe67e22)
+        
         self.clear_items()
         for idx, opt in enumerate(q['opts']):
             btn = discord.ui.Button(label=f"{chr(65+idx)}) {opt}"[:80], custom_id=str(idx), style=discord.ButtonStyle.secondary)
+            
             async def cb(inter, b=btn):
                 if inter.user.id != self.user_id: return
-                if int(b.custom_id) == self.questoes[self.atual]['ans']: self.pontos += 1
+                
+                # Salva os dados para o relatório antes de passar para a próxima
+                questao_atual = self.questoes[self.atual]
+                escolha_idx = int(b.custom_id)
+                correta_idx = questao_atual['ans']
+                
+                self.relatorio.append({
+                    'pergunta': questao_atual['q'],
+                    'marcada': questao_atual['opts'][escolha_idx],
+                    'gabarito': questao_atual['opts'][correta_idx],
+                    'correto': escolha_idx == correta_idx
+                })
+
+                if escolha_idx == correta_idx: self.pontos += 1
                 self.atual += 1; await self.atualizar(inter)
+            
             btn.callback = cb; self.add_item(btn)
+        
         if interaction.response.is_done(): await interaction.edit_original_response(embed=embed, view=self)
         else: await interaction.response.edit_message(embed=embed, view=self)
-
 
 class ViewEscolhaSimulado(discord.ui.View):
     def __init__(self, user_id): 
