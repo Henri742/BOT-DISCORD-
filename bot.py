@@ -189,6 +189,44 @@ class ModalTabelaVerdade(discord.ui.Modal):
 # ==========================================
 # 🚀 COMANDOS DO BOT (SLASH COMMANDS)
 # ==========================================
+
+class ViewPainelSimulado(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None) # Fica ativo para sempre
+
+    @discord.ui.button(label="Iniciar Novo Simulado", style=discord.ButtonStyle.primary, emoji="📝", custom_id="persistent:iniciar")
+    async def iniciar_sala(self, interaction: discord.Interaction, button: discord.ui.Button):
+        # 1. Criar categoria ou canal privado
+        guild = interaction.guild
+        user = interaction.user
+        
+        # Configura as permissões: Ninguém vê, exceto o bot e o aluno
+        overwrites = {
+            guild.default_role: discord.PermissionOverwrite(read_messages=False),
+            user: discord.PermissionOverwrite(read_messages=True, send_messages=True),
+            guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True)
+        }
+        
+        nome_canal = f"simulado-{user.name}".lower()
+        canal_privado = await guild.create_text_channel(nome_canal, overwrites=overwrites)
+        
+        await interaction.response.send_message(f"✅ Sua sala de prova foi criada: {canal_privado.mention}", ephemeral=True)
+        
+        # 2. Enviar mensagem inicial no canal novo para escolher a matéria
+        embed = discord.Embed(title="🎒 Bem-vindo à Sala de Prova", description="Escolha a matéria para começar:", color=0x8e44ad)
+        await canal_privado.send(embed=embed, view=PainelCursos())
+
+@bot.tree.command(name="setup_simulado", description="Cria o botão fixo para abrir salas de simulado.")
+@app_commands.checks.has_permissions(administrator=True)
+async def setup_simulado(interaction: discord.Interaction):
+    embed = discord.Embed(
+        title="📝 Central de Simulados", 
+        description="Clique no botão abaixo para abrir uma sala privada e iniciar sua prova.\n\n*O canal será deletado automaticamente ao fim do teste.*", 
+        color=0x3498db
+    )
+    await interaction.response.send_message("Painel criado!", ephemeral=True)
+    await interaction.channel.send(embed=embed, view=ViewPainelSimulado())
+
 @bot.tree.command(name="helpprof", description="Manual completo de todas as funções da plataforma.")
 async def helpprof(interaction: discord.Interaction):
     embed = discord.Embed(title="📚 Manual do Gustavo LMS", description="As funcionalidades disponíveis no servidor:", color=0xf1c40f)
