@@ -92,6 +92,7 @@ class PainelCursos(discord.ui.View):
     @discord.ui.button(label="Lógica de Programação", style=discord.ButtonStyle.danger, emoji="💻")
     async def btn_lp(self, i: discord.Interaction, b: discord.ui.Button):
         await i.response.send_message("Módulos de Lógica de Programação:", view=discord.ui.View().add_item(DropdownResumos("Programacao")), ephemeral=True)
+
 class ViewSimulado(discord.ui.View):
     def __init__(self, user_id, questoes, materia):
         super().__init__(timeout=600)
@@ -100,12 +101,28 @@ class ViewSimulado(discord.ui.View):
 
     async def atualizar(self, interaction: discord.Interaction):
         if self.atual >= self.total:
-            xp = self.pontos * 20
-            adicionar_xp(self.user_id, xp)
-            embed = discord.Embed(title="📊 Simulado Finalizado", description=f"✅ Acertos: {self.pontos}/{self.total}\n⭐ XP: +{xp}", color=0x2ecc71)
-            await interaction.response.edit_message(content="🏁 Prova encerrada! O canal fechará em 15s.", embed=None, view=None)
-            await interaction.channel.send(embed=embed)
-            await asyncio.sleep(15); await interaction.channel.delete(); return
+            xp_ganho = self.pontos * 20
+            adicionar_xp(self.user_id, xp_ganho)
+            
+            embed_fim = discord.Embed(title="📊 Simulado Finalizado", color=0x2ecc71)
+            embed_fim.add_field(name="Matéria", value=self.materia, inline=False)
+            embed_fim.add_field(name="Acertos", value=f"{self.pontos}/{self.total}", inline=True)
+            embed_fim.add_field(name="XP Ganho", value=f"+{xp_ganho} ⭐", inline=True)
+            
+            # 📩 ENVIO PARA O PRIVADO (DM)
+            try:
+                user = await interaction.client.fetch_user(self.user_id)
+                await user.send(content="Aqui está a cópia do seu resultado:", embed=embed_fim)
+                msg_dm = "\n✅ Uma cópia foi enviada para o seu privado!"
+            except:
+                msg_dm = "\n⚠️ Não consegui enviar para seu privado (verifique se as DMs estão abertas)."
+
+            await interaction.response.edit_message(content=f"🏁 Prova encerrada! {msg_dm}\nO canal será deletado em 15s.", embed=None, view=None)
+            await interaction.channel.send(embed=embed_fim)
+            
+            await asyncio.sleep(15)
+            await interaction.channel.delete()
+            return
 
         q = self.questoes[self.atual]
         registrar_questao(self.user_id, self.materia, q['q'])
@@ -153,14 +170,52 @@ class ViewEscolhaSimulado(discord.ui.View):
         view = ViewSimulado(self.user_id, disponiveis[:5], materia_id)
         await interaction.response.edit_message(content=f"📝 Iniciando Simulado de {materia_id}...", view=None)
         await view.atualizar(interaction)
-class ViewPainelSimulado(discord.ui.View):
-    def __init__(self): super().__init__(timeout=None)
-    @discord.ui.button(label="Iniciar Novo Simulado", style=discord.ButtonStyle.primary, emoji="📝", custom_id="persistent:iniciar")
-    async def iniciar_sala(self, interaction: discord.Interaction, button: discord.ui.Button):
-        overwrites = {interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False), interaction.user: discord.PermissionOverwrite(read_messages=True), interaction.guild.me: discord.PermissionOverwrite(read_messages=True)}
-        canal = await interaction.guild.create_text_channel(f"prova-{interaction.user.name}".lower(), overwrites=overwrites)
-        await interaction.response.send_message(f"✅ Sala privada criada: {canal.mention}", ephemeral=True)
-        await canal.send(embed=discord.Embed(title="📚 Preparado para o Simulado?", description="Escolha a matéria abaixo para começar imediatamente.", color=0x8e44ad), view=ViewEscolhaSimulado(interaction.user.id))
+
+class ViewEscolhaSimulado(discord.ui.View):
+    def __init__(self, user_id): 
+        super().__init__(timeout=None)
+        self.user_id = user_id
+        self.materia_selecionada = None
+        self.qtd_selecionada = 5  # Valor padrão
+
+    @discord.ui.select(placeholder="1. Escolha a matéria...", options=[
+        discord.SelectOption(label="Matemática Aplicada", value="Matematica_Aplicada", emoji="🔢"),
+        discord.SelectOption(label="Gestão de Times", value="Gestao_Times", emoji="👥"),
+        discord.SelectOption(label="Lógica Matemática", value="Matematica_Logica", emoji="⚖️"),
+        discord.SelectOption(label="Lógica de Programação", value="Programacao", emoji="💻")
+    ])
+    async def select_materia(self, interaction: discord.Interaction, select: discord.ui.Select):
+        self.materia_selecionada = select.values[0]
+        await interaction.response.edit_message(content=f"📚 Matéria: **{self.materia_selecionada}**\n agora escolha a quantidade abaixo:", view=self)
+
+    @discord.ui.select(placeholder="2. Quantidade de questões...", options=[
+        discord.SelectOption(label="2 questões", value="2"),
+        discord.SelectOption(label="5 questões", value="5"),
+        discord.SelectOption(label="10 questões", value="10"),
+        discord.SelectOption(label="15 questões", value="15"),
+        discord.SelectOption(label="20 questões", value="20"),
+        discord.SelectOption(label="25 questões", value="25"),
+        discord.SelectOption(label="30 questões", value="30")
+    ])
+    async def select_qtd(self, interaction: discord.Interaction, select: discord.ui.Select):
+        if not self.materia_selecionada:
+            return await interaction.response.send_message("❌ Escolha a matéria primeiro!", ephemeral=True)
+        
+        self.qtd_selecionada = int(select.values[0])
+        todas = DADOS["questoes"].get(self.materia_selecionada, [])
+        resolvidas = pegar_resolvidas(self.user_id, self.materia_selecionada)
+        disponiveis = [q for q in todas if q['q'] not in resolvidas]
+
+        if not disponiveis:
+            return await interaction.response.edit_message(content="❌ Você já resolveu todas as questões desta matéria!", view=None)
+
+        random.shuffle(disponiveis)
+        # Pega a quantidade escolhida ou o máximo disponível
+        selecionadas = disponiveis[:self.qtd_selecionada]
+        
+        view = ViewSimulado(self.user_id, selecionadas, self.materia_selecionada)
+        await interaction.response.edit_message(content=f"📝 Iniciando Simulado ({len(selecionadas)} questões)...", view=None)
+        await view.atualizar(interaction)
 
 class ModalTabelaVerdade(discord.ui.Modal):
     l1 = discord.ui.TextInput(label='1. p=V, q=V', max_length=1, placeholder="V ou F")
